@@ -27,3 +27,20 @@ Graphs made with awesome Mini Graph Card from Karl Kihlström https://github.com
 
 [1]: http://www.ingeras.es/manual/ABH2010IMB08.pdf
 [2]: http://www.ingeras.es/manual/ABH2010IMC14.pdf
+
+## Fork Modifications: Hybrid 3Play Support
+
+This fork adds specific support for **INGECON SUN STORAGE 3Play (Hybrid)** inverters that use a non-standard register map (Low Addresses 0-200), which differs from the standard 3Play map (1000+).
+
+### New Features
+- **Auto-detection**: The integration now automatically detects this specific model based on register patterns.
+- **Manual Selection**: Added \3play\ option in the configuration flow to force this mode.
+- **Full Hybrid Monitoring**:
+  - **Battery**: Voltage, Current, SOC, Temperature, Status.
+  - **Grid & Meter**: Internal and External meter readings (L1/L2/L3).
+  - **Critical Loads**: Backup output monitoring.
+  - **PV Strings**: Individual string monitoring.
+
+### Configuration
+If auto-detection fails, select **3play** in the model selection dropdown during configuration.
+
