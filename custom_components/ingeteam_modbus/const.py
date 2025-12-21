@@ -50,14 +50,18 @@ INGE_3P = [
     
     # Battery Data
     R("battery_voltage", 16, "uint16", 0.1, "V", description="Battery Voltage"),
+    R("battery_voltage_internal", 17, "uint16", 0.1, "V", description="Battery Voltage Internal"),
     R("battery_current", 19, "int16", 0.01, "A", signed=True, description="Battery Current"),
     R("battery_power", 18, "int16", 1.0, "W", signed=True, description="Battery Power"),
     R("battery_state_of_charge", 22, "uint16", 1.0, "%", description="Battery State of Charge"),
     R("battery_state_of_health", 23, "uint16", 1.0, "%", description="Battery State of Health"),
     R("battery_charging_current_max", 24, "uint16", 0.01, "A", description="Max Charging Current"),
+    R("battery_discharging_current_max", 25, "uint16", 0.01, "A", description="Max Discharging Current"),
     R("battery_charging_voltage", 28, "uint16", 0.1, "V", description="Battery Charging Voltage"),
     R("battery_discharging_voltage", 29, "uint16", 0.1, "V", description="Battery Discharging Voltage"),
     R("battery_temp", 31, "int16", 0.1, "°C", signed=True, description="Battery Temperature"),
+    R("battery_status", 21, "uint16", 1.0, None, description="Battery Status"),
+    R("battery_bms_alarms", 47, "uint16", 1.0, None, description="Battery BMS Alarms"),
     
     # PV Power
     R("pv1_voltage", 32, "uint16", 1.0, "V", description="PV1 Voltage"),
@@ -81,6 +85,12 @@ INGE_3P = [
     R("cl_active_power_l1", 51, "int16", 0.1, "W", signed=True, description="Critical Load Power L1"),
     R("cl_active_power_l2", 55, "int16", 0.1, "W", signed=True, description="Critical Load Power L2"),
     R("cl_active_power_l3", 59, "int16", 0.1, "W", signed=True, description="Critical Load Power L3"),
+    # Reactive Powers (Estimated)
+    R("cl_reactive_power_l1", 67, "int16", 1.0, "var", signed=True, description="Critical Load Reactive Power L1"),
+    R("cl_reactive_power_l2", 69, "int16", 1.0, "var", signed=True, description="Critical Load Reactive Power L2"),
+    R("cl_reactive_power_l3", 71, "int16", 1.0, "var", signed=True, description="Critical Load Reactive Power L3"),
+    # Frequency
+    R("ac_freq", 63, "uint16", 0.01, "Hz", description="AC Frequency"),
     
     # Internal Meter (Grid/Inverter Output)
     # Voltages
@@ -91,23 +101,58 @@ INGE_3P = [
     R("im_current_l1", 76, "uint16", 0.01, "A", description="Internal Meter Current L1"),
     R("im_current_l2", 78, "uint16", 0.01, "A", description="Internal Meter Current L2"),
     R("im_current_l3", 80, "uint16", 0.01, "A", description="Internal Meter Current L3"),
-    # Powers
+    # Active Powers
     R("im_active_power_l1", 83, "int16", 0.1, "W", signed=True, description="Internal Meter Power L1"),
     R("im_active_power_l2", 85, "int16", 0.1, "W", signed=True, description="Internal Meter Power L2"),
     R("im_active_power_l3", 87, "int16", 0.1, "W", signed=True, description="Internal Meter Power L3"),
+    # Reactive Powers (Estimated)
+    R("im_reactive_power_l1", 84, "int16", 0.1, "var", signed=True, description="Internal Meter Reactive Power L1"),
+    R("im_reactive_power_l2", 86, "int16", 0.1, "var", signed=True, description="Internal Meter Reactive Power L2"),
+    R("im_reactive_power_l3", 88, "int16", 0.1, "var", signed=True, description="Internal Meter Reactive Power L3"),
+    # Frequency & PF
+    R("im_freq", 81, "uint16", 0.01, "Hz", description="Internal Meter Frequency"),
+    R("im_power_factor", 89, "int16", 0.001, None, signed=True, description="Internal Meter Power Factor"),
     
     # External Meter
+    # Active Powers
     R("em_active_power_l1", 91, "int16", 1.0, "W", signed=True, description="External Meter Power L1"),
     R("em_active_power_l2", 95, "int16", 1.0, "W", signed=True, description="External Meter Power L2"),
     R("em_active_power_l3", 99, "int16", 1.0, "W", signed=True, description="External Meter Power L3"),
+    # Reactive Powers (Estimated)
+    R("em_reactive_power_l1", 92, "int16", 1.0, "var", signed=True, description="External Meter Reactive Power L1"),
+    R("em_reactive_power_l2", 96, "int16", 1.0, "var", signed=True, description="External Meter Reactive Power L2"),
+    R("em_reactive_power_l3", 100, "int16", 1.0, "var", signed=True, description="External Meter Reactive Power L3"),
     
     # Totals
     R("total_loads_power", 65, "uint16", 1.0, "W", description="Total Loads Power"),
     
     # Status & Alarms
-    R("inverter_state", 12, "uint16", 1.0, None, description="Inverter State"),
+    R("inverter_state", 129, "uint16", 1.0, None, description="Inverter State"),
     R("total_hours", 6, "uint32", 1.0, "h", description="Total Operating Hours"),
     R("alarm_code", 10, "uint32", 1.0, None, description="Alarm Code"),
+    
+    # Digital I/O (Estimated)
+    R("do_1_status", 106, "uint16", 1.0, None, description="Digital Output 1 Status"),
+    R("do_2_status", 108, "uint16", 1.0, None, description="Digital Output 2 Status"),
+    
+    # Temperatures (Estimated)
+    R("temp_mod_1", 125, "int16", 1.0, "°C", signed=True, description="Temperature Module 1"),
+    R("temp_pcb", 127, "int16", 1.0, "°C", signed=True, description="Internal Temperature"),
+    
+    # Missing Entities Placeholders (To match production)
+    R("active_power", 38, "int16", 1.0, "W", signed=True, description="Active Power"), # Re-added
+    R("reactive_power", 39, "int16", 1.0, "var", signed=True, description="Reactive Power"), # Placeholder
+    R("power_factor", 40, "int16", 0.001, None, signed=True, description="Power Factor"), # Placeholder
+    R("dc_bus_voltage", 41, "uint16", 1.0, "V", description="DC Bus Voltage"), # Placeholder
+    R("temp_mod_2", 126, "int16", 1.0, "°C", signed=True, description="Temperature Module 2"), # Placeholder
+    R("di_drm_status", 110, "uint16", 1.0, None, description="Digital Input DRM0 Status"), # Placeholder
+    R("di_2_status", 111, "uint16", 1.0, None, description="Digital Input 2 Status"), # Placeholder
+    R("di_3_status", 112, "uint16", 1.0, None, description="Digital Input 3 Status"), # Placeholder
+    R("em_voltage", 102, "uint16", 1.0, "V", description="External Meter Voltage"), # Updated from 101 based on scan (233V)
+    R("em_freq", 103, "uint16", 0.1, "Hz", description="External Meter Frequency"), # Placeholder (Value 234 -> 23.4Hz? or Voltage L2?)
+    R("em_active_power_returned", 105, "int16", 1.0, "W", signed=True, description="External Meter Power Returned"), # Updated from 103 (Value 59?)
+    R("ev_power", 104, "int16", 1.0, "W", signed=True, description="EV Power"), # Placeholder
+    R("battery_discharge_limitation_reason", 48, "uint16", 1.0, None, description="Battery Discharge Limitation Reason"), # Placeholder
 ]
 
 # Create register maps
