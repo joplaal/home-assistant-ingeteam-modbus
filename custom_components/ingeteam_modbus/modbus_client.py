@@ -87,14 +87,26 @@ class ModbusClient:
                     return None
                 
                 with self._lock:
-                    if is_input:
-                        response = self._client.read_input_registers(
-                            address=address, count=count, slave=unit
-                        )
-                    else:
-                        response = self._client.read_holding_registers(
-                            address=address, count=count, slave=unit
-                        )
+                    try:
+                        # Try Pymodbus v3+ syntax (slave)
+                        if is_input:
+                            response = self._client.read_input_registers(
+                                address=address, count=count, slave=unit
+                            )
+                        else:
+                            response = self._client.read_holding_registers(
+                                address=address, count=count, slave=unit
+                            )
+                    except TypeError:
+                        # Fallback for Pymodbus v2.x syntax (unit)
+                        if is_input:
+                            response = self._client.read_input_registers(
+                                address=address, count=count, unit=unit
+                            )
+                        else:
+                            response = self._client.read_holding_registers(
+                                address=address, count=count, unit=unit
+                            )
                 
                 if response.isError():
                     _LOGGER.warning(
@@ -241,7 +253,7 @@ class ModbusClient:
             if not (-50 <= value <= 150):  # Reasonable temperature range
                 return False
         elif register.unit == "Hz":  # Frequency
-            if not (40 <= value <= 70):  # Grid frequency range
+            if not (0 <= value <= 70):  # Relaxed frequency range to allow 0 or lower values
                 return False
         
         return True
