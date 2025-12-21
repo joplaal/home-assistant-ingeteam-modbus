@@ -89,11 +89,11 @@ class ModbusClient:
                 with self._lock:
                     if is_input:
                         response = self._client.read_input_registers(
-                            address=address, count=count, device_id=unit
+                            address=address, count=count, slave=unit
                         )
                     else:
                         response = self._client.read_holding_registers(
-                            address=address, count=count, device_id=unit
+                            address=address, count=count, slave=unit
                         )
                 
                 if response.isError():

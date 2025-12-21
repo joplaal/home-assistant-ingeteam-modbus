@@ -139,6 +139,39 @@ INGE_3P = [
     R("temp_mod_1", 125, "int16", 1.0, "°C", signed=True, description="Temperature Module 1"),
     R("temp_pcb", 127, "int16", 1.0, "°C", signed=True, description="Internal Temperature"),
     
+    # ==========================================================================
+    # LEGACY ALIASES (Restoring entities for backward compatibility)
+    # ==========================================================================
+    
+    # AC / Inverter Output (Mapping to Critical Loads registers as best guess)
+    R("ac_l1_voltage", 60, "uint16", 0.1, "V", description="L1 AC Voltage"),
+    R("ac_l2_voltage", 61, "uint16", 0.1, "V", description="L2 AC Voltage"),
+    R("ac_l3_voltage", 62, "uint16", 0.1, "V", description="L3 AC Voltage"),
+    
+    R("ac_l1_current", 49, "uint16", 0.01, "A", description="L1 AC Current"),
+    R("ac_l2_current", 53, "uint16", 0.01, "A", description="L2 AC Current"),
+    R("ac_l3_current", 57, "uint16", 0.01, "A", description="L3 AC Current"),
+    
+    R("ac_l1_power", 51, "int16", 0.1, "W", signed=True, description="L1 AC Power"),
+    R("ac_l2_power", 55, "int16", 0.1, "W", signed=True, description="L2 AC Power"),
+    R("ac_l3_power", 59, "int16", 0.1, "W", signed=True, description="L3 AC Power"),
+    
+    R("ac_l1_freq", 63, "uint16", 0.01, "Hz", description="L1 Frequency"),
+    R("ac_l2_freq", 63, "uint16", 0.01, "Hz", description="L2 Frequency"),
+    R("ac_l3_freq", 63, "uint16", 0.01, "Hz", description="L3 Frequency"),
+    
+    # Totals
+    R("p_total", 38, "int16", 1.0, "W", signed=True, description="Total Active Power"),
+    R("q_total", 39, "int16", 1.0, "var", signed=True, description="Total Reactive Power"),
+    
+    # Battery Legacy
+    # Mapping signed power to both charging/discharging sensors (User will see same value, but entity exists)
+    R("battery_charging_power", 18, "int16", 1.0, "W", signed=True, description="Battery Charging Power"),
+    R("battery_discharging_power", 18, "int16", 1.0, "W", signed=True, description="Battery Discharging Power"),
+    
+    # Internal Meter Legacy
+    R("im_voltage", 75, "uint16", 0.1, "V", description="Internal Meter Voltage"), # Using L1 as proxy
+    
     # Missing Entities Placeholders (To match production)
     R("active_power", 38, "int16", 1.0, "W", signed=True, description="Active Power"), # Re-added
     R("reactive_power", 39, "int16", 1.0, "var", signed=True, description="Reactive Power"), # Placeholder
