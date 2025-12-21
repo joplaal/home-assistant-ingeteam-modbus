@@ -48,13 +48,10 @@ INGE_3P = [
     # System Status
     R("rms_diff_current", 1, "uint16", 1.0, "mA", description="RMS Differential Current"),
     
-    # Power (Inverter Output)
-    R("active_power", 38, "int16", 1.0, "W", signed=True, description="Active Power"),
-    
     # Battery Data
     R("battery_voltage", 16, "uint16", 0.1, "V", description="Battery Voltage"),
-    R("battery_voltage_internal", 17, "uint16", 0.1, "V", description="Battery Voltage Internal"),
     R("battery_current", 19, "int16", 0.01, "A", signed=True, description="Battery Current"),
+    R("battery_power", 18, "int16", 1.0, "W", signed=True, description="Battery Power"),
     R("battery_state_of_charge", 22, "uint16", 1.0, "%", description="Battery State of Charge"),
     R("battery_state_of_health", 23, "uint16", 1.0, "%", description="Battery State of Health"),
     R("battery_charging_current_max", 24, "uint16", 0.01, "A", description="Max Charging Current"),
@@ -71,60 +68,46 @@ INGE_3P = [
     R("pv2_current", 36, "uint16", 0.01, "A", description="PV2 Current"),
     R("pv2_power", 37, "uint16", 1.0, "W", description="PV2 Power"),
     
-    # 3-Phase Voltages (Internal Meter)
-    R("ac_l1_voltage", 60, "uint16", 0.1, "V", description="L1 Voltage"),
-    R("ac_l2_voltage", 61, "uint16", 0.1, "V", description="L2 Voltage"),
-    R("ac_l3_voltage", 62, "uint16", 0.1, "V", description="L3 Voltage"),
+    # Critical Loads (Output)
+    # Voltages
+    R("cl_voltage_l1", 60, "uint16", 0.1, "V", description="Critical Load Voltage L1"),
+    R("cl_voltage_l2", 61, "uint16", 0.1, "V", description="Critical Load Voltage L2"),
+    R("cl_voltage_l3", 62, "uint16", 0.1, "V", description="Critical Load Voltage L3"),
+    # Currents
+    R("cl_current_l1", 49, "uint16", 0.01, "A", description="Critical Load Current L1"),
+    R("cl_current_l2", 53, "uint16", 0.01, "A", description="Critical Load Current L2"),
+    R("cl_current_l3", 57, "uint16", 0.01, "A", description="Critical Load Current L3"),
+    # Powers
+    R("cl_active_power_l1", 51, "int16", 0.1, "W", signed=True, description="Critical Load Power L1"),
+    R("cl_active_power_l2", 55, "int16", 0.1, "W", signed=True, description="Critical Load Power L2"),
+    R("cl_active_power_l3", 59, "int16", 0.1, "W", signed=True, description="Critical Load Power L3"),
     
-    # Frequency
-    R("ac_freq", 63, "uint16", 0.01, "Hz", description="AC Frequency"),
-    
-    # Total Loads
-    R("total_loads_power", 920, "uint16", 1.0, "W", description="Total Loads Power"),
-    R("ev_power", 66, "int16", 1.0, "W", signed=True, description="EV Power"),
-    
-    # 3-Phase Currents (Internal Meter)
-    R("ac_l1_current", 76, "uint16", 0.01, "A", description="L1 Current"),
-    R("ac_l2_current", 78, "uint16", 0.01, "A", description="L2 Current"),
-    R("ac_l3_current", 80, "uint16", 0.01, "A", description="L3 Current"),
-    
-    # Internal Grid Meter Powers
+    # Internal Meter (Grid/Inverter Output)
+    # Voltages
+    R("im_voltage_l1", 75, "uint16", 0.1, "V", description="Internal Meter Voltage L1"),
+    R("im_voltage_l2", 77, "uint16", 0.1, "V", description="Internal Meter Voltage L2"),
+    R("im_voltage_l3", 79, "uint16", 0.1, "V", description="Internal Meter Voltage L3"),
+    # Currents
+    R("im_current_l1", 76, "uint16", 0.01, "A", description="Internal Meter Current L1"),
+    R("im_current_l2", 78, "uint16", 0.01, "A", description="Internal Meter Current L2"),
+    R("im_current_l3", 80, "uint16", 0.01, "A", description="Internal Meter Current L3"),
+    # Powers
     R("im_active_power_l1", 83, "int16", 0.1, "W", signed=True, description="Internal Meter Power L1"),
     R("im_active_power_l2", 85, "int16", 0.1, "W", signed=True, description="Internal Meter Power L2"),
     R("im_active_power_l3", 87, "int16", 0.1, "W", signed=True, description="Internal Meter Power L3"),
     
-    # External Grid Meter Powers (Mapped to known Consumption registers)
-    R("em_active_power_l1", 910, "int16", 1.0, "W", signed=True, description="External Meter Power L1"),
-    R("em_active_power_l2", 900, "int16", 1.0, "W", signed=True, description="External Meter Power L2"),
-    R("em_active_power_l3", 901, "int16", 1.0, "W", signed=True, description="External Meter Power L3"), # 0W placeholder
+    # External Meter
+    R("em_active_power_l1", 91, "int16", 1.0, "W", signed=True, description="External Meter Power L1"),
+    R("em_active_power_l2", 95, "int16", 1.0, "W", signed=True, description="External Meter Power L2"),
+    R("em_active_power_l3", 99, "int16", 1.0, "W", signed=True, description="External Meter Power L3"),
+    
+    # Totals
+    R("total_loads_power", 65, "uint16", 1.0, "W", description="Total Loads Power"),
     
     # Status & Alarms
-    R("inverter_state", 129, "uint16", 1.0, None, description="Inverter State"),
-    R("total_hours", 105, "uint16", 1.0, "h", description="Total Operating Hours"),
-    R("alarm_code", 100, "uint32", 1.0, None, description="Alarm Code"),
-    
-    # Digital I/O
-    R("do_1_status", 113, "uint16", 1.0, None, description="Digital Output 1 Status"),
-    R("do_2_status", 114, "uint16", 1.0, None, description="Digital Output 2 Status"),
-    R("di_drm_status", 115, "uint16", 1.0, None, description="Digital Input DRM0 Status"),
-    R("di_2_status", 116, "uint16", 1.0, None, description="Digital Input 2 Status"),
-    R("di_3_status", 117, "uint16", 1.0, None, description="Digital Input 3 Status"),
-    
-    # Critical Loads (Backup)
-    # L1/L2 Power registers not found in scan. L3 confirmed at 1000.
-    # L1 Current found at 11.
-    R("cl_current_l1", 11, "uint16", 0.01, "A", description="Critical Loads Current L1"),
-    R("cl_active_power_l1", 803, "int16", 1.0, "W", signed=True, description="Critical Loads Power L1"),
-    
-    R("cl_current_l2", 57, "uint16", 0.01, "A", description="Critical Loads Current L2"),
-    R("cl_active_power_l2", 900, "int16", 1.0, "W", signed=True, description="Critical Loads Power L2"), # Best guess
-    
-    R("cl_current_l3", 53, "uint16", 1.0, "A", description="Critical Loads Current L3"),
-    R("cl_active_power_l3", 1000, "int16", 1.0, "W", signed=True, description="Critical Loads Power L3"),
-    
-    # Critical Load Voltages (Found in scan)
-    R("cl_voltage", 914, "uint16", 1.0, "V", description="Critical Loads Voltage"),
-    R("cl_freq", 915, "uint16", 0.1, "Hz", description="Critical Loads Frequency"),
+    R("inverter_state", 12, "uint16", 1.0, None, description="Inverter State"),
+    R("total_hours", 6, "uint32", 1.0, "h", description="Total Operating Hours"),
+    R("alarm_code", 10, "uint32", 1.0, None, description="Alarm Code"),
 ]
 
 # Create register maps
