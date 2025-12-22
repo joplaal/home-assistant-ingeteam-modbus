@@ -21,6 +21,7 @@ INVERTER_STATUS_TYPES = {
 
 INVERTER_SENSOR_TYPES = {
     "Active_Power": ["Active Power", "active_power", "W", None],
+    "Inverter_Active_Power": ["Inverter Active Power", "inverter_active_power", "W", None],
     "Active_Energy": ["Active Energy", "active_energy", "Wh", None, "active_power"],
     "Reactive_Power": ["Reactive Power", "reactive_power", "W", None],
     "Power_factor": ["Power factor Cosφ", "power_factor", None, None],
