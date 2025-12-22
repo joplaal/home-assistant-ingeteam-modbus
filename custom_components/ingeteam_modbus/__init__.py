@@ -272,11 +272,27 @@ class IngeteamModbusHub:
             _LOGGER.error("Error reading modbus registers (100-130): %s", req2)
             return False
 
-        registers = req1.registers + req2.registers
+        # Chunk 3: 1000-1050 (PV Data for Hybrid 3Play)
+        req3 = self.read_input_registers(unit=self._address, address=1000, count=50)
+        if req3.isError():
+             _LOGGER.error("Error reading modbus registers (1000-1050): %s", req3)
+             # Don't fail completely, just use zeros
+             regs_1000 = [0] * 50
+        else:
+             regs_1000 = req3.registers
+
+        registers = req1.registers + req2.registers + regs_1000
         
         if len(registers) < 130:
-             _LOGGER.warning("Incomplete Modbus response, expected 130 registers but got %s", len(registers))
+             _LOGGER.warning("Incomplete Modbus response, expected at least 130 registers but got %s", len(registers))
              return False
+
+        # Helper to get 1000-range values safely
+        def get_1000(offset):
+            idx = 130 + offset
+            if idx < len(registers):
+                return registers[idx]
+            return 0
 
         # --- 3Play Hybrid Mapping ---
         
@@ -306,12 +322,35 @@ class IngeteamModbusHub:
         self.data["battery_discharge_limitation_reason"] = registers[48] # Placeholder mapping
         
         # PV
-        self.data["pv1_voltage"] = registers[32] / 1.0
-        self.data["pv1_current"] = registers[33] / 100.0
-        self.data["pv1_power"] = registers[34] / 1.0
-        self.data["pv2_voltage"] = registers[35] / 1.0
-        self.data["pv2_current"] = registers[36] / 100.0
-        self.data["pv2_power"] = registers[37] / 1.0
+        # Updated mapping for Hybrid 3Play using 1000-range
+        # 1025: PV1 Current (x100)
+        # 1027: PV1 Power
+        # 1029: PV2 Current (x100)
+        # 1031: PV2 Power
+        
+        self.data["pv1_current"] = get_1000(25) / 100.0
+        self.data["pv1_power"] = get_1000(27) / 1.0
+        
+        # Calculate Voltage if possible (P/I)
+        if self.data["pv1_current"] > 0:
+            self.data["pv1_voltage"] = self.data["pv1_power"] / self.data["pv1_current"]
+        else:
+            self.data["pv1_voltage"] = 0.0
+            
+        self.data["pv2_current"] = get_1000(29) / 100.0
+        self.data["pv2_power"] = get_1000(31) / 1.0
+        
+        if self.data["pv2_current"] > 0:
+            self.data["pv2_voltage"] = self.data["pv2_power"] / self.data["pv2_current"]
+        else:
+            self.data["pv2_voltage"] = 0.0
+            
+        # self.data["pv1_voltage"] = registers[32] / 1.0 # Old mapping 0
+        # self.data["pv1_current"] = registers[33] / 100.0 # Old mapping 0
+        # self.data["pv1_power"] = registers[34] / 1.0 # Old mapping 0
+        # self.data["pv2_voltage"] = registers[35] / 1.0 # Old mapping 0
+        # self.data["pv2_current"] = registers[36] / 100.0 # Old mapping 0
+        # self.data["pv2_power"] = registers[37] / 1.0 # Old mapping 0
         
         # Legacy Totals
         self.data["p_total"] = self._decode_signed(registers[38]) / 1.0
@@ -391,8 +430,16 @@ class IngeteamModbusHub:
         self.data["do_1_status"] = registers[106]
         self.data["do_2_status"] = registers[108]
         self.data["di_drm_status"] = registers[110]
-        self.data["di_2_status"] = registers[111]
-        self.data["di_3_status"] = registers[112]
+        # self.data["di_2_status"] = registers[111] # Values 11/12 do not match boolean status
+        # self.data["di_3_status"] = registers[112] # Value 37 does not match boolean status
+        
+        # New Mappings from Hunt
+        # self.data["battery_charge_limitation_reason"] = registers[2] # Value 22 out of range for enum
+        self.data["battery_bms_warnings"] = registers[4] # Likely bitmask
+        self.data["battery_bms_errors"] = registers[5] # Likely bitmask
+        self.data["ap_reduction_ratio"] = registers[14]
+        self.data["ap_reduction_reason"] = registers[15]
+        # self.data["waiting_time"] = registers[120] # Value 21634 too high for seconds
         
         self.data["temp_mod_1"] = self._decode_signed(registers[125]) / 1.0
         self.data["temp_mod_2"] = self._decode_signed(registers[126]) / 1.0
@@ -457,5 +504,18 @@ class IngeteamModbusHub:
         # Grid Balance
         # Assuming Grid Balance = Import - Export
         self.data["grid_balance"] = self.data.get("em_active_power", 0) - self.data.get("em_active_power_returned", 0)
+
+        # System Efficiency
+        p_ac = self.data.get("active_power", 0)
+        p_pv = self.data.get("pv_total_power", 0)
+        p_bat_dis = self.data.get("battery_discharging_power", 0)
+        p_bat_chg = self.data.get("battery_charging_power", 0)
+        
+        p_dc = p_pv + p_bat_dis - p_bat_chg
+        
+        if p_dc > 50: # Minimum 50W to calculate efficiency
+            self.data["system_efficiency"] = min(100.0, max(0.0, (p_ac / p_dc) * 100.0))
+        else:
+            self.data["system_efficiency"] = 0.0
 
         return True
