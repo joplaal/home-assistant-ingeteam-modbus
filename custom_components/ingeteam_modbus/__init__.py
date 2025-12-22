@@ -200,18 +200,11 @@ class IngeteamModbusHub:
     def read_input_registers(self, unit, address, count):
         """Read input registers."""
         with self._lock:
-            # --- DEBUG START ---
+            # Try pymodbus v3.10+ (device_id keyword)
             try:
-                import pymodbus
-                import inspect
-                _LOGGER.warning("DEBUG: pymodbus version: %s", pymodbus.__version__)
-                try:
-                    _LOGGER.warning("DEBUG: read_input_registers signature: %s", inspect.signature(self._client.read_input_registers))
-                except Exception:
-                    pass
-            except Exception as e:
-                _LOGGER.warning("DEBUG: Could not inspect: %s", e)
-            # --- DEBUG END ---
+                return self._client.read_input_registers(address=address, count=count, device_id=unit)
+            except TypeError:
+                pass
 
             # Try pymodbus v3.x (slave keyword)
             try:
@@ -222,19 +215,6 @@ class IngeteamModbusHub:
             # Try pymodbus v2.x (unit keyword)
             try:
                 return self._client.read_input_registers(address=address, count=count, unit=unit)
-            except TypeError:
-                pass
-
-            # Try positional (v3.x fallback if keyword fails)
-            try:
-                return self._client.read_input_registers(address, count, unit)
-            except TypeError:
-                pass
-            
-            # Try without unit (fallback)
-            try:
-                _LOGGER.warning("DEBUG: Trying read_input_registers without unit/slave ID")
-                return self._client.read_input_registers(address=address, count=count)
             except TypeError:
                 pass
 
