@@ -127,6 +127,7 @@ class IngeteamModbusHub:
         self._unsub_interval_method = None
         self._sensors = []
         self.data = {}
+        self._slave_arg = None
 
     @callback
     def async_add_ingeteam_sensor(self, update_callback):
@@ -200,23 +201,39 @@ class IngeteamModbusHub:
     def read_input_registers(self, unit, address, count):
         """Read input registers."""
         with self._lock:
+            kwargs = {"address": address, "count": count}
+            
+            # If we already know the correct argument, use it
+            if self._slave_arg:
+                kwargs[self._slave_arg] = unit
+                return self._client.read_input_registers(**kwargs)
+
             # Try pymodbus v3.10+ (device_id keyword)
             try:
-                return self._client.read_input_registers(address=address, count=count, device_id=unit)
+                kwargs["device_id"] = unit
+                result = self._client.read_input_registers(**kwargs)
+                self._slave_arg = "device_id"
+                return result
             except TypeError:
-                pass
+                kwargs.pop("device_id")
 
             # Try pymodbus v3.x (slave keyword)
             try:
-                return self._client.read_input_registers(address=address, count=count, slave=unit)
+                kwargs["slave"] = unit
+                result = self._client.read_input_registers(**kwargs)
+                self._slave_arg = "slave"
+                return result
             except TypeError:
-                pass
+                kwargs.pop("slave")
             
             # Try pymodbus v2.x (unit keyword)
             try:
-                return self._client.read_input_registers(address=address, count=count, unit=unit)
+                kwargs["unit"] = unit
+                result = self._client.read_input_registers(**kwargs)
+                self._slave_arg = "unit"
+                return result
             except TypeError:
-                pass
+                kwargs.pop("unit")
 
             _LOGGER.error("Could not read registers: pymodbus version incompatibility")
             raise ModbusException("Incompatible pymodbus version")
