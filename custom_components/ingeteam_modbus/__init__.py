@@ -200,6 +200,19 @@ class IngeteamModbusHub:
     def read_input_registers(self, unit, address, count):
         """Read input registers."""
         with self._lock:
+            # --- DEBUG START ---
+            try:
+                import pymodbus
+                import inspect
+                _LOGGER.warning("DEBUG: pymodbus version: %s", pymodbus.__version__)
+                try:
+                    _LOGGER.warning("DEBUG: read_input_registers signature: %s", inspect.signature(self._client.read_input_registers))
+                except Exception:
+                    pass
+            except Exception as e:
+                _LOGGER.warning("DEBUG: Could not inspect: %s", e)
+            # --- DEBUG END ---
+
             # Try pymodbus v3.x (slave keyword)
             try:
                 return self._client.read_input_registers(address=address, count=count, slave=unit)
@@ -218,6 +231,13 @@ class IngeteamModbusHub:
             except TypeError:
                 pass
             
+            # Try without unit (fallback)
+            try:
+                _LOGGER.warning("DEBUG: Trying read_input_registers without unit/slave ID")
+                return self._client.read_input_registers(address=address, count=count)
+            except TypeError:
+                pass
+
             _LOGGER.error("Could not read registers: pymodbus version incompatibility")
             raise ModbusException("Incompatible pymodbus version")
 
