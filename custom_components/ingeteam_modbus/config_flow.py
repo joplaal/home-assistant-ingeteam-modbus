@@ -11,11 +11,9 @@ from .const import (
     DEFAULT_SCAN_INTERVAL,
     DEFAULT_PORT,
     DEFAULT_MODBUS_ADDRESS,
-    DEFAULT_MODEL,
     CONF_MODBUS_ADDRESS,
     CONF_READ_METER,
     CONF_READ_BATTERY,
-    CONF_MODEL,
     DEFAULT_READ_METER,
     DEFAULT_READ_BATTERY,
 )
@@ -27,10 +25,9 @@ DATA_SCHEMA = vol.Schema(
         vol.Required(CONF_HOST): str,
         vol.Required(CONF_PORT, default=DEFAULT_PORT): int,
         vol.Optional(CONF_MODBUS_ADDRESS, default=DEFAULT_MODBUS_ADDRESS): int,
-        vol.Optional(CONF_MODEL, default=DEFAULT_MODEL): vol.In(["auto", "1play", "3play"]),
         vol.Optional(CONF_READ_METER, default=DEFAULT_READ_METER): bool,
         vol.Optional(CONF_READ_BATTERY, default=DEFAULT_READ_BATTERY): bool,
-        vol.Optional(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): vol.All(vol.Coerce(int), vol.Range(min=1, max=30)),
+        vol.Optional(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): int,
     }
 )
 
