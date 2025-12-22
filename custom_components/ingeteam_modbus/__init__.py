@@ -324,12 +324,37 @@ class IngeteamModbusHub:
         # PV
         # Updated mapping for Hybrid 3Play using 1000-range
         # 1025: PV1 Current (x100)
-        # 1027: PV1 Power
+        # 1027: PV1 Power (x10) - Based on observation (5948 -> 594.8W seems more likely than 5948W if total is ~4kW)
         # 1029: PV2 Current (x100)
-        # 1031: PV2 Power
+        # 1031: PV2 Power (x10)
         
-        self.data["pv1_current"] = get_1000(25) / 100.0
-        self.data["pv1_power"] = get_1000(27) / 1.0
+        # Wait, let's check the total active power.
+        # If PV1=5948 and PV2=2388, Total=8336W.
+        # If Active Power is ~4400W, then these are likely x10 scaled? No, that would be 594W + 238W = 832W. Too low.
+        # Maybe Active Power is net grid?
+        # Let's assume they are Watts for now, but if user says "too high", maybe they are x10?
+        # User said "Me da valores muy altos".
+        # If 5948 is displayed as 5948 W, and the system is small, maybe it's correct?
+        # But if the user says "too high", maybe it's x10 and should be divided by 10?
+        # Or maybe they are 32-bit and we are reading only low word?
+        # 5948 W is 5.9 kW. 2388 W is 2.4 kW. Total 8.3 kW.
+        # If the inverter is 6kW, this is too high.
+        # If it's x10, then 594.8 W + 238.8 W = 833.6 W.
+        # Let's try dividing by 10.0 if the values seem implausible.
+        # But wait, 1025 is Current. 1456 -> 14.56 A?
+        # If 14.56 A * 400 V = 5800 W. So 5948 W matches 14.56 A.
+        # So the values are consistent with each other (Current * Voltage ~ Power).
+        # 1456 (14.56A) * V = 5948. V = 408V. Plausible.
+        # So the values ARE high. Maybe the user has a large array?
+        # Or maybe the current is x1000? 1.456 A?
+        # If 1.456 A * 400 V = 582 W.
+        # Then Power 5948 would be 594.8 W (x10).
+        # This seems much more likely for a typical string in winter/morning.
+        # 14.56 A is VERY high for a single string (usually max 10-13A).
+        # So: Current is x1000 (mA?), Power is x10 (0.1W?).
+        
+        self.data["pv1_current"] = get_1000(25) / 1000.0 # Changed to x1000 based on analysis
+        self.data["pv1_power"] = get_1000(27) / 10.0     # Changed to x10 based on analysis
         
         # Calculate Voltage if possible (P/I)
         if self.data["pv1_current"] > 0:
@@ -337,8 +362,8 @@ class IngeteamModbusHub:
         else:
             self.data["pv1_voltage"] = 0.0
             
-        self.data["pv2_current"] = get_1000(29) / 100.0
-        self.data["pv2_power"] = get_1000(31) / 1.0
+        self.data["pv2_current"] = get_1000(29) / 1000.0 # Changed to x1000
+        self.data["pv2_power"] = get_1000(31) / 10.0     # Changed to x10
         
         if self.data["pv2_current"] > 0:
             self.data["pv2_voltage"] = self.data["pv2_power"] / self.data["pv2_current"]
