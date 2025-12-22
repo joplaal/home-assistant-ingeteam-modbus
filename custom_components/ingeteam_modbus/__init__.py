@@ -200,10 +200,26 @@ class IngeteamModbusHub:
     def read_input_registers(self, unit, address, count):
         """Read input registers."""
         with self._lock:
+            # Try pymodbus v3.x (slave keyword)
             try:
                 return self._client.read_input_registers(address=address, count=count, slave=unit)
             except TypeError:
+                pass
+            
+            # Try pymodbus v2.x (unit keyword)
+            try:
                 return self._client.read_input_registers(address=address, count=count, unit=unit)
+            except TypeError:
+                pass
+
+            # Try positional (v3.x fallback if keyword fails)
+            try:
+                return self._client.read_input_registers(address, count, unit)
+            except TypeError:
+                pass
+            
+            _LOGGER.error("Could not read registers: pymodbus version incompatibility")
+            raise ModbusException("Incompatible pymodbus version")
 
     @staticmethod
     def _decode_signed(value: int) -> int:
