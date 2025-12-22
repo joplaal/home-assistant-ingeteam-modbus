@@ -400,4 +400,62 @@ class IngeteamModbusHub:
         self.data["inverter_state"] = registers[129]
         self.data["status"] = INVERTER_STATUS.get(registers[129], f"Unknown ({registers[129]})")
 
+        # --- Calculated Values ---
+        
+        # Critical Loads Aggregates
+        self.data["cl_active_power"] = (
+            self.data.get("cl_active_power_l1", 0) + 
+            self.data.get("cl_active_power_l2", 0) + 
+            self.data.get("cl_active_power_l3", 0)
+        )
+        self.data["cl_reactive_power"] = (
+            self.data.get("cl_reactive_power_l1", 0) + 
+            self.data.get("cl_reactive_power_l2", 0) + 
+            self.data.get("cl_reactive_power_l3", 0)
+        )
+        self.data["cl_voltage"] = self.data.get("cl_voltage_l1", 0) # Proxy using L1
+        self.data["cl_current"] = (
+            self.data.get("cl_current_l1", 0) + 
+            self.data.get("cl_current_l2", 0) + 
+            self.data.get("cl_current_l3", 0)
+        )
+
+        # Internal Meter Aggregates
+        self.data["im_active_power"] = (
+            self.data.get("im_active_power_l1", 0) + 
+            self.data.get("im_active_power_l2", 0) + 
+            self.data.get("im_active_power_l3", 0)
+        )
+        self.data["im_reactive_power"] = (
+            self.data.get("im_reactive_power_l1", 0) + 
+            self.data.get("im_reactive_power_l2", 0) + 
+            self.data.get("im_reactive_power_l3", 0)
+        )
+        self.data["im_current"] = (
+            self.data.get("im_current_l1", 0) + 
+            self.data.get("im_current_l2", 0) + 
+            self.data.get("im_current_l3", 0)
+        )
+
+        # External Meter Aggregates
+        self.data["em_active_power"] = (
+            self.data.get("em_active_power_l1", 0) + 
+            self.data.get("em_active_power_l2", 0) + 
+            self.data.get("em_active_power_l3", 0)
+        )
+        self.data["em_reactive_power"] = (
+            self.data.get("em_reactive_power_l1", 0) + 
+            self.data.get("em_reactive_power_l2", 0) + 
+            self.data.get("em_reactive_power_l3", 0)
+        )
+        
+        # PV Aggregates
+        self.data["pv_internal_total_power"] = self.data.get("pv1_power", 0) + self.data.get("pv2_power", 0)
+        self.data["external_pv_power"] = 0 # Placeholder as no register is defined yet
+        self.data["pv_total_power"] = self.data["pv_internal_total_power"] + self.data["external_pv_power"]
+
+        # Grid Balance
+        # Assuming Grid Balance = Import - Export
+        self.data["grid_balance"] = self.data.get("em_active_power", 0) - self.data.get("em_active_power_returned", 0)
+
         return True
