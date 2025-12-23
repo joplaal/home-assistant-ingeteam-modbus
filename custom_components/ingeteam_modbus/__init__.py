@@ -304,7 +304,9 @@ class IngeteamModbusHub:
         # Battery
         self.data["battery_voltage"] = registers[16] / 10.0
         self.data["battery_voltage_internal"] = registers[17] / 10.0
-        self.data["battery_power"] = self._decode_signed(registers[18]) / 1.0
+        # self.data["battery_power"] = self._decode_signed(registers[18]) / 1.0
+        # Updated based on scan: Reg 21 matches Battery Power (x10)
+        self.data["battery_power"] = self._decode_signed(registers[21]) / 10.0
         
         # Split Battery Power into Charge/Discharge
         if self.data["battery_power"] > 0:
@@ -315,8 +317,9 @@ class IngeteamModbusHub:
             self.data["battery_charging_power"] = abs(self.data["battery_power"])
         
         self.data["battery_current"] = self._decode_signed(registers[19]) / 100.0
-        self.data["battery_status"] = BATTERY_STATUS.get(registers[21], f"Unknown ({registers[21]})")
-        self.data["battery_state_of_charge"] = registers[22] / 1.0
+        # self.data["battery_status"] = BATTERY_STATUS.get(registers[21], f"Unknown ({registers[21]})") # Reg 21 is Power
+        self.data["battery_status"] = "Unknown"
+        self.data["battery_state_of_charge"] = registers[29] / 100.0
         self.data["battery_state_of_health"] = registers[23] / 1.0
         self.data["battery_charging_current_max"] = registers[24] / 100.0
         self.data["battery_discharging_current_max"] = registers[25] / 100.0
@@ -329,14 +332,15 @@ class IngeteamModbusHub:
         # PV
         # Updated mapping for Hybrid 3Play using 1000-range and 0-100 range
         # Analysis of values shows:
-        # Reg 1047: PV1 Power (x10)
-        # Reg 1051: PV2 Power (x10)
-        # Reg 28: PV1 Voltage (x10)
-        # Reg 42: PV2 Voltage (x10)
+        # Reg 1047: PV1 Power (x10) -> Incorrect, using Reg 80 (x1)
+        # Reg 1051: PV2 Power (x10) -> Incorrect, using Reg 120 (x0.01)
+        # Reg 28: PV1 Voltage (x10) -> Incorrect?
+        # Reg 42: PV2 Voltage (x10) -> Incorrect, using Reg 1027 (x10)
         
         # PV1
-        self.data["pv1_power"] = get_1000(47) / 10.0
-        self.data["pv1_voltage"] = registers[28] / 10.0
+        # self.data["pv1_power"] = get_1000(47) / 10.0
+        self.data["pv1_power"] = registers[41] / 10.0
+        self.data["pv1_voltage"] = registers[38] / 10.0
         
         if self.data["pv1_voltage"] > 0:
             self.data["pv1_current"] = self.data["pv1_power"] / self.data["pv1_voltage"]
@@ -344,19 +348,21 @@ class IngeteamModbusHub:
             self.data["pv1_current"] = 0.0
         
         # PV2
-        self.data["pv2_power"] = get_1000(51) / 10.0
+        # self.data["pv2_power"] = get_1000(51) / 10.0
+        self.data["pv2_power"] = registers[45] / 10.0
         self.data["pv2_voltage"] = registers[42] / 10.0
+        # self.data["pv2_voltage"] = get_1000(27) / 10.0
         
         if self.data["pv2_voltage"] > 0:
             self.data["pv2_current"] = self.data["pv2_power"] / self.data["pv2_voltage"]
         else:
             self.data["pv2_current"] = 0.0
             
-        # Total PV Power (Sum of individual strings for consistency)
+        # Total PV Power (Calculated from PV1 + PV2)
         self.data["pv_total_power"] = self.data["pv1_power"] + self.data["pv2_power"]
         
         # Legacy Totals
-        self.data["p_total"] = self._decode_signed(registers[38]) / 1.0
+        self.data["p_total"] = registers[65] / 1.0 # Reg 65 is Total Loads/Power
         self.data["active_power"] = self.data["p_total"] # Alias
         self.data["q_total"] = self._decode_signed(registers[39]) / 1.0
         self.data["reactive_power"] = self.data["q_total"] # Alias
@@ -446,7 +452,8 @@ class IngeteamModbusHub:
         
         self.data["temp_mod_1"] = self._decode_signed(registers[125]) / 1.0
         self.data["temp_mod_2"] = self._decode_signed(registers[126]) / 1.0
-        self.data["temp_pcb"] = self._decode_signed(registers[127]) / 1.0
+        # self.data["temp_pcb"] = self._decode_signed(registers[127]) / 1.0
+        self.data["temp_pcb"] = self._decode_signed(registers[112]) / 1.0
         self.data["inverter_state"] = registers[129]
         self.data["status"] = INVERTER_STATUS.get(registers[129], f"Unknown ({registers[129]})")
 
