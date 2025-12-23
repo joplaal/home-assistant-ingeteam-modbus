@@ -417,7 +417,7 @@ class IngeteamModbusHub:
         self.data["im_reactive_power_l1"] = self._decode_signed(registers[84]) / 10.0
         self.data["im_active_power_l2"] = self._decode_signed(registers[87]) / 10.0
         self.data["im_reactive_power_l2"] = self._decode_signed(registers[88]) / 10.0
-        self.data["im_active_power_l3"] = self._decode_signed(registers[91]) / 10.0
+        self.data["im_active_power_l3"] = self._decode_signed(registers[91]) / 1.0
         self.data["im_reactive_power_l3"] = self._decode_signed(registers[92]) / 10.0
         
         self.data["im_power_factor"] = self._decode_signed(registers[89]) / 1000.0
@@ -528,25 +528,16 @@ class IngeteamModbusHub:
         # Estimate AC Output
         self.data["inverter_active_power"] = p_dc_in # * 0.96
         
-        # System Efficiency (Self Consumption Ratio / Autarky)
-        # Ratio = (Total Loads - Grid Import) / Total Loads * 100
-        # User definition: % of total load consumption that does not come from the grid
-        total_loads = self.data.get("total_loads_power", 0)
-        grid_import = self.data.get("em_active_power", 0)
+        # System Efficiency (Solar Coverage Ratio)
+        # Calculates system self-sufficiency. Can exceed 100% if generating more than consuming (charging/exporting).
+        # Formula: (PV Production + Battery Discharge) / Total Loads * 100
+        pv_power = self.data.get("pv_total_power", 0)
+        bat_discharge = self.data.get("battery_discharging_power", 0)
+        loads_power = self.data.get("total_loads_power", 0)
         
-        if total_loads > 10:
-            imported = max(0, grid_import)
-            # If we are importing more than total loads (charging battery from grid?), 
-            # self consumption for loads is 0.
-            # However, total_loads usually includes house loads. 
-            # If battery charging is separate, we should be fine.
-            
-            self_powered = total_loads - imported
-            if self_powered < 0:
-                self_powered = 0
-            
-            ratio = (self_powered / total_loads) * 100.0
-            self.data["system_efficiency"] = min(100.0, ratio)
+        if loads_power > 0:
+            ratio = ((pv_power + bat_discharge) / loads_power) * 100.0
+            self.data["system_efficiency"] = ratio
         else:
             self.data["system_efficiency"] = 0.0
 
