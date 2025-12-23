@@ -528,14 +528,26 @@ class IngeteamModbusHub:
         # Estimate AC Output
         self.data["inverter_active_power"] = p_dc_in # * 0.96
         
-        # System Efficiency
-        # If we use DC=AC, efficiency is 100%. 
-        # If we want real efficiency, we need a real AC Output sensor.
-        # For now, we set it to 100% or calculate based on Reg 38 if it was valid.
-        # Since Reg 38 is weird, we skip efficiency or set to 0.
-        if p_dc_in > 50:
-             self.data["system_efficiency"] = 100.0 # Placeholder
+        # System Efficiency (Self Consumption Ratio / Autarky)
+        # Ratio = (Total Loads - Grid Import) / Total Loads * 100
+        # User definition: % of total load consumption that does not come from the grid
+        total_loads = self.data.get("total_loads_power", 0)
+        grid_import = self.data.get("em_active_power", 0)
+        
+        if total_loads > 10:
+            imported = max(0, grid_import)
+            # If we are importing more than total loads (charging battery from grid?), 
+            # self consumption for loads is 0.
+            # However, total_loads usually includes house loads. 
+            # If battery charging is separate, we should be fine.
+            
+            self_powered = total_loads - imported
+            if self_powered < 0:
+                self_powered = 0
+            
+            ratio = (self_powered / total_loads) * 100.0
+            self.data["system_efficiency"] = min(100.0, ratio)
         else:
-             self.data["system_efficiency"] = 0.0
+            self.data["system_efficiency"] = 0.0
 
         return True
