@@ -317,9 +317,8 @@ class IngeteamModbusHub:
             self.data["battery_charging_power"] = abs(self.data["battery_power"])
         
         self.data["battery_current"] = self._decode_signed(registers[19]) / 100.0
-        # self.data["battery_status"] = BATTERY_STATUS.get(registers[21], f"Unknown ({registers[21]})") # Reg 21 is Power
-        self.data["battery_status"] = "Unknown"
-        self.data["battery_state_of_charge"] = registers[29] / 100.0
+        self.data["battery_status"] = BATTERY_STATUS.get(registers[30], f"Unknown ({registers[30]})")
+        self.data["battery_state_of_charge"] = registers[22] / 1.0
         self.data["battery_state_of_health"] = registers[23] / 1.0
         self.data["battery_charging_current_max"] = registers[24] / 100.0
         self.data["battery_discharging_current_max"] = registers[25] / 100.0
