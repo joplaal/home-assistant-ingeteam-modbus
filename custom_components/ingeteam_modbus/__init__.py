@@ -415,20 +415,21 @@ class IngeteamModbusHub:
         
         self.data["im_active_power_l1"] = self._decode_signed(registers[83]) / 10.0
         self.data["im_reactive_power_l1"] = self._decode_signed(registers[84]) / 10.0
-        self.data["im_active_power_l2"] = self._decode_signed(registers[85]) / 10.0
-        self.data["im_reactive_power_l2"] = self._decode_signed(registers[86]) / 10.0
-        self.data["im_active_power_l3"] = self._decode_signed(registers[87]) / 10.0
-        self.data["im_reactive_power_l3"] = self._decode_signed(registers[88]) / 10.0
+        self.data["im_active_power_l2"] = self._decode_signed(registers[87]) / 10.0
+        self.data["im_reactive_power_l2"] = self._decode_signed(registers[88]) / 10.0
+        self.data["im_active_power_l3"] = self._decode_signed(registers[91]) / 10.0
+        self.data["im_reactive_power_l3"] = self._decode_signed(registers[92]) / 10.0
         
         self.data["im_power_factor"] = self._decode_signed(registers[89]) / 1000.0
         
         # External Meter
-        self.data["em_active_power_l1"] = self._decode_signed(registers[91]) / 1.0
-        self.data["em_reactive_power_l1"] = self._decode_signed(registers[92]) / 1.0
-        self.data["em_active_power_l2"] = self._decode_signed(registers[95]) / 1.0
-        self.data["em_reactive_power_l2"] = self._decode_signed(registers[96]) / 1.0
-        self.data["em_active_power_l3"] = self._decode_signed(registers[99]) / 1.0
-        self.data["em_reactive_power_l3"] = self._decode_signed(registers[100]) / 1.0
+        # Shifted based on Internal Meter ending at 94 (83+4+4+4)
+        self.data["em_active_power_l1"] = self._decode_signed(registers[95]) / 1.0
+        self.data["em_reactive_power_l1"] = self._decode_signed(registers[96]) / 1.0
+        self.data["em_active_power_l2"] = self._decode_signed(registers[99]) / 1.0
+        self.data["em_reactive_power_l2"] = self._decode_signed(registers[100]) / 1.0
+        self.data["em_active_power_l3"] = self._decode_signed(registers[103]) / 1.0
+        self.data["em_reactive_power_l3"] = self._decode_signed(registers[104]) / 1.0
         
         self.data["em_voltage"] = registers[102] / 1.0
         self.data["em_freq"] = registers[103] / 10.0
