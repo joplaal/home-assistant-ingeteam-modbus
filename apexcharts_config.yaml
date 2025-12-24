@@ -42,8 +42,8 @@ series:
       func: last
       duration: 5m
 
-  # --- CONSUMO ---
-  # 1. Valor actual para cabecera
+  # --- CONSUMO (Línea de referencia) ---
+  # 1. Valor actual
   - entity: sensor.ingeteam_total_loads_power
     name: Consumo
     color: '#444444'
@@ -53,7 +53,7 @@ series:
     group_by:
       func: last
       duration: 5m
-  # 2. Gráfica suavizada
+  # 2. Gráfica
   - entity: sensor.ingeteam_total_loads_power
     name: Consumo
     type: line
@@ -67,8 +67,10 @@ series:
       func: avg
       duration: 5m
 
-  # --- FOTOVOLTAICA ---
-  # 1. Valor actual para cabecera
+  # --- FUENTES DE ENERGÍA (Apiladas) ---
+  # Al activar stacked: true globalmente, todas las series tipo 'area' se apilan automáticamente.
+  
+  # 1. FOTOVOLTAICA
   - entity: sensor.ingeteam_pv_total_power
     name: Fotovoltaica
     color: '#FFD700'
@@ -78,14 +80,13 @@ series:
     group_by:
       func: last
       duration: 5m
-  # 2. Gráfica suavizada
   - entity: sensor.ingeteam_pv_total_power
     name: Fotovoltaica
     type: area
     yaxis_id: power
     color: '#FFD700'
     opacity: 0.6
-    stroke_width: 1
+    stroke_width: 0
     extend_to: now
     show:
       in_header: false
@@ -93,34 +94,7 @@ series:
       func: avg
       duration: 5m
 
-  # --- CARGA BATERÍA ---
-  # 1. Valor actual para cabecera
-  - entity: sensor.ingeteam_battery_charging_power
-    name: Carga Bat
-    color: '#FF8C00'
-    show:
-      in_chart: false
-      in_header: true
-    group_by:
-      func: last
-      duration: 5m
-  # 2. Gráfica suavizada
-  - entity: sensor.ingeteam_battery_charging_power
-    name: Carga Batería
-    type: area
-    yaxis_id: power
-    color: '#FF8C00'
-    opacity: 0.8
-    stroke_width: 1
-    extend_to: now
-    show:
-      in_header: false
-    group_by:
-      func: avg
-      duration: 5m
-
-  # --- DESCARGA BATERÍA ---
-  # 1. Valor actual para cabecera
+  # 2. DESCARGA BATERÍA
   - entity: sensor.ingeteam_battery_discharging_power
     name: Descarga Bat
     color: '#4CAF50'
@@ -130,14 +104,13 @@ series:
     group_by:
       func: last
       duration: 5m
-  # 2. Gráfica suavizada
   - entity: sensor.ingeteam_battery_discharging_power
     name: Descarga Batería
     type: area
     yaxis_id: power
     color: '#4CAF50'
     opacity: 0.7
-    stroke_width: 1
+    stroke_width: 0
     extend_to: now
     show:
       in_header: false
@@ -145,8 +118,7 @@ series:
       func: avg
       duration: 5m
 
-  # --- RED (IMPORT) ---
-  # 1. Valor actual para cabecera (solo si importa)
+  # 3. RED (IMPORT)
   - entity: sensor.ingeteam_grid_power_balance
     name: Red (Import)
     color: '#2196F3'
@@ -157,15 +129,38 @@ series:
     group_by:
       func: last
       duration: 5m
-  # 2. Gráfica suavizada
   - entity: sensor.ingeteam_grid_power_balance
     name: Red (Import)
     type: area
     yaxis_id: power
     color: '#2196F3'
     opacity: 0.7
-    stroke_width: 1
+    stroke_width: 0
     transform: 'return x > 0 ? x : 0;'
+    extend_to: now
+    show:
+      in_header: false
+    group_by:
+      func: avg
+      duration: 5m
+
+  # --- CARGA BATERÍA (Independiente) ---
+  # Cambiamos a 'line' para que NO se apile con las fuentes.
+  - entity: sensor.ingeteam_battery_charging_power
+    name: Carga Bat
+    color: '#FF8C00'
+    show:
+      in_chart: false
+      in_header: true
+    group_by:
+      func: last
+      duration: 5m
+  - entity: sensor.ingeteam_battery_charging_power
+    name: Carga Batería
+    type: line
+    yaxis_id: power
+    color: '#FF8C00'
+    stroke_width: 2
     extend_to: now
     show:
       in_header: false
@@ -176,6 +171,7 @@ series:
 apex_config:
   chart:
     height: 450px
+    stacked: true
   legend:
     position: bottom
   stroke:
