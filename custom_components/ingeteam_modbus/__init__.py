@@ -304,19 +304,32 @@ class IngeteamModbusHub:
         # Battery
         self.data["battery_voltage"] = registers[16] / 10.0
         self.data["battery_voltage_internal"] = registers[17] / 10.0
-        # self.data["battery_power"] = self._decode_signed(registers[18]) / 1.0
-        # Updated based on scan: Reg 21 matches Battery Power (x10)
-        self.data["battery_power"] = self._decode_signed(registers[21]) / 10.0
         
-        # Split Battery Power into Charge/Discharge
-        if self.data["battery_power"] > 0:
-            self.data["battery_discharging_power"] = self.data["battery_power"]
-            self.data["battery_charging_power"] = 0.0
-        else:
-            self.data["battery_discharging_power"] = 0.0
-            self.data["battery_charging_power"] = abs(self.data["battery_power"])
+        # Battery Power Logic
+        # Reg 21 seems to be negative for both Charging and Discharging in some firmware versions.
+        # We use Reg 19 (Battery Current) to determine the direction.
+        # Reg 19 > 0: Discharging
+        # Reg 19 < 0: Charging
         
+        raw_power = self._decode_signed(registers[21]) / 10.0
         self.data["battery_current"] = self._decode_signed(registers[19]) / 100.0
+        
+        if self.data["battery_current"] > 0:
+            # Discharging
+            self.data["battery_power"] = abs(raw_power)
+            self.data["battery_discharging_power"] = abs(raw_power)
+            self.data["battery_charging_power"] = 0.0
+        elif self.data["battery_current"] < 0:
+            # Charging
+            self.data["battery_power"] = -abs(raw_power)
+            self.data["battery_discharging_power"] = 0.0
+            self.data["battery_charging_power"] = abs(raw_power)
+        else:
+            # Standby or 0 current
+            self.data["battery_power"] = 0.0
+            self.data["battery_discharging_power"] = 0.0
+            self.data["battery_charging_power"] = 0.0
+        
         self.data["battery_status"] = BATTERY_STATUS.get(registers[30], f"Unknown ({registers[30]})")
         self.data["battery_state_of_charge"] = registers[22] / 1.0
         self.data["battery_state_of_health"] = registers[23] / 1.0

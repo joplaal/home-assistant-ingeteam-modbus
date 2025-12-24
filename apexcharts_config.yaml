@@ -1,0 +1,186 @@
+type: custom:apexcharts-card
+header:
+  show: true
+  title: Balance Energético
+  show_states: true
+  colorize_states: true
+graph_span: 24h
+span:
+  start: day
+now:
+  show: true
+  label: Ahora
+yaxis:
+  - id: power
+    min: 0
+    decimals: 0
+    apex_config:
+      title:
+        text: Potencia (W)
+  - id: soc
+    min: 0
+    max: 100
+    opposite: true
+    decimals: 0
+    apex_config:
+      title:
+        text: SOC (%)
+      tickAmount: 5
+series:
+  # --- SOC ---
+  - entity: sensor.ingeteam_battery_state_of_charge
+    name: SOC
+    type: line
+    yaxis_id: soc
+    color: '#9e9e9e'
+    stroke_width: 2
+    extend_to: now
+    show:
+      legend_value: false
+      in_header: true
+    group_by:
+      func: last
+      duration: 5m
+
+  # --- CONSUMO ---
+  # 1. Valor actual para cabecera
+  - entity: sensor.ingeteam_total_loads_power
+    name: Consumo
+    color: '#444444'
+    show:
+      in_chart: false
+      in_header: true
+    group_by:
+      func: last
+      duration: 5m
+  # 2. Gráfica suavizada
+  - entity: sensor.ingeteam_total_loads_power
+    name: Consumo
+    type: line
+    yaxis_id: power
+    color: '#444444'
+    stroke_width: 2
+    extend_to: now
+    show:
+      in_header: false
+    group_by:
+      func: avg
+      duration: 5m
+
+  # --- FOTOVOLTAICA ---
+  # 1. Valor actual para cabecera
+  - entity: sensor.ingeteam_pv_total_power
+    name: Fotovoltaica
+    color: '#FFD700'
+    show:
+      in_chart: false
+      in_header: true
+    group_by:
+      func: last
+      duration: 5m
+  # 2. Gráfica suavizada
+  - entity: sensor.ingeteam_pv_total_power
+    name: Fotovoltaica
+    type: area
+    yaxis_id: power
+    color: '#FFD700'
+    opacity: 0.6
+    stroke_width: 1
+    extend_to: now
+    show:
+      in_header: false
+    group_by:
+      func: avg
+      duration: 5m
+
+  # --- CARGA BATERÍA ---
+  # 1. Valor actual para cabecera
+  - entity: sensor.ingeteam_battery_charging_power
+    name: Carga Bat
+    color: '#FF8C00'
+    show:
+      in_chart: false
+      in_header: true
+    group_by:
+      func: last
+      duration: 5m
+  # 2. Gráfica suavizada
+  - entity: sensor.ingeteam_battery_charging_power
+    name: Carga Batería
+    type: area
+    yaxis_id: power
+    color: '#FF8C00'
+    opacity: 0.8
+    stroke_width: 1
+    extend_to: now
+    show:
+      in_header: false
+    group_by:
+      func: avg
+      duration: 5m
+
+  # --- DESCARGA BATERÍA ---
+  # 1. Valor actual para cabecera
+  - entity: sensor.ingeteam_battery_discharging_power
+    name: Descarga Bat
+    color: '#4CAF50'
+    show:
+      in_chart: false
+      in_header: true
+    group_by:
+      func: last
+      duration: 5m
+  # 2. Gráfica suavizada
+  - entity: sensor.ingeteam_battery_discharging_power
+    name: Descarga Batería
+    type: area
+    yaxis_id: power
+    color: '#4CAF50'
+    opacity: 0.7
+    stroke_width: 1
+    extend_to: now
+    show:
+      in_header: false
+    group_by:
+      func: avg
+      duration: 5m
+
+  # --- RED (IMPORT) ---
+  # 1. Valor actual para cabecera (solo si importa)
+  - entity: sensor.ingeteam_grid_power_balance
+    name: Red (Import)
+    color: '#2196F3'
+    transform: 'return x > 0 ? x : 0;'
+    show:
+      in_chart: false
+      in_header: true
+    group_by:
+      func: last
+      duration: 5m
+  # 2. Gráfica suavizada
+  - entity: sensor.ingeteam_grid_power_balance
+    name: Red (Import)
+    type: area
+    yaxis_id: power
+    color: '#2196F3'
+    opacity: 0.7
+    stroke_width: 1
+    transform: 'return x > 0 ? x : 0;'
+    extend_to: now
+    show:
+      in_header: false
+    group_by:
+      func: avg
+      duration: 5m
+
+apex_config:
+  chart:
+    height: 450px
+  legend:
+    position: bottom
+  stroke:
+    curve: smooth
+  fill:
+    type: solid
+grid_options:
+  columns: full
