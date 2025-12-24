@@ -413,24 +413,26 @@ class IngeteamModbusHub:
         
         self.data["im_freq"] = registers[81] / 100.0
         
-        self.data["im_active_power_l1"] = self._decode_signed(registers[83]) / 1.0
+        self.data["im_active_power_l1"] = self._decode_signed(registers[83]) / 10.0
         self.data["im_reactive_power_l1"] = self._decode_signed(registers[84]) / 10.0
-        self.data["im_active_power_l2"] = self._decode_signed(registers[87]) / 1.0
+        self.data["im_active_power_l2"] = self._decode_signed(registers[87]) / 10.0
         self.data["im_reactive_power_l2"] = self._decode_signed(registers[88]) / 10.0
-        self.data["im_active_power_l3"] = self._decode_signed(registers[91]) / 1.0
+        self.data["im_active_power_l3"] = self._decode_signed(registers[91]) / 10.0
         self.data["im_reactive_power_l3"] = self._decode_signed(registers[92]) / 10.0
         
         self.data["im_power_factor"] = self._decode_signed(registers[89]) / 1000.0
         
         # External Meter
-        # Mapping to same registers as Internal Meter as they seem to represent the Grid Exchange
-        # and sum up to the Total Load (Reg 65)
-        self.data["em_active_power_l1"] = self._decode_signed(registers[83]) / 1.0
-        self.data["em_reactive_power_l1"] = self._decode_signed(registers[84]) / 1.0
-        self.data["em_active_power_l2"] = self._decode_signed(registers[87]) / 1.0
-        self.data["em_reactive_power_l2"] = self._decode_signed(registers[88]) / 1.0
-        self.data["em_active_power_l3"] = self._decode_signed(registers[91]) / 1.0
-        self.data["em_reactive_power_l3"] = self._decode_signed(registers[92]) / 1.0
+        # Mapped based on manual correlation:
+        # L1 (811 W) -> Reg 91 (815)
+        # L2 (4804 W) -> Reg 95 (4799)
+        # L3 (689 W) -> Reg 99 (690)
+        self.data["em_active_power_l1"] = self._decode_signed(registers[91]) / 1.0
+        self.data["em_reactive_power_l1"] = self._decode_signed(registers[92]) / 1.0
+        self.data["em_active_power_l2"] = self._decode_signed(registers[95]) / 1.0
+        self.data["em_reactive_power_l2"] = self._decode_signed(registers[96]) / 1.0
+        self.data["em_active_power_l3"] = self._decode_signed(registers[99]) / 1.0
+        self.data["em_reactive_power_l3"] = self._decode_signed(registers[100]) / 1.0
         
         self.data["em_voltage"] = registers[102] / 1.0
         self.data["em_freq"] = registers[103] / 10.0
@@ -516,14 +518,11 @@ class IngeteamModbusHub:
         # self.data["pv_total_power"] is already set from Reg 1001
 
         # Grid Balance
-        # Calculated from signed Internal Meter registers (Positive = Import, Negative = Export)
-        # Since we mapped EM to IM registers, we can use em_active_power directly if it sums signed values.
-        # But em_active_power is currently sum of absolute values or signed?
-        # Let's recalculate properly:
+        # Calculated from signed External Meter registers (Positive = Import, Negative = Export)
         
-        grid_p_l1 = self.data.get("im_active_power_l1", 0)
-        grid_p_l2 = self.data.get("im_active_power_l2", 0)
-        grid_p_l3 = self.data.get("im_active_power_l3", 0)
+        grid_p_l1 = self.data.get("em_active_power_l1", 0)
+        grid_p_l2 = self.data.get("em_active_power_l2", 0)
+        grid_p_l3 = self.data.get("em_active_power_l3", 0)
         
         self.data["grid_balance"] = grid_p_l1 + grid_p_l2 + grid_p_l3
 
