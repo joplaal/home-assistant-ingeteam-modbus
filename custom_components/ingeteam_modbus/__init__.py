@@ -435,7 +435,10 @@ class IngeteamModbusHub:
         self.data["em_voltage"] = registers[102] / 1.0
         self.data["em_freq"] = registers[103] / 10.0
         self.data["ev_power"] = self._decode_signed(registers[104]) / 1.0
-        self.data["em_active_power_returned"] = self._decode_signed(registers[105]) / 1.0
+        
+        # Reg 105 is Energy (Accumulated), not Power. Removing it from Power sensor to avoid spikes.
+        # self.data["em_active_power_returned"] = self._decode_signed(registers[105]) / 1.0
+        self.data["em_active_power_returned"] = 0.0
         
         self.data["do_1_status"] = registers[106]
         self.data["do_2_status"] = registers[108]
@@ -513,8 +516,16 @@ class IngeteamModbusHub:
         # self.data["pv_total_power"] is already set from Reg 1001
 
         # Grid Balance
-        # Assuming Grid Balance = Import - Export
-        self.data["grid_balance"] = self.data.get("em_active_power", 0) - self.data.get("em_active_power_returned", 0)
+        # Calculated from signed Internal Meter registers (Positive = Import, Negative = Export)
+        # Since we mapped EM to IM registers, we can use em_active_power directly if it sums signed values.
+        # But em_active_power is currently sum of absolute values or signed?
+        # Let's recalculate properly:
+        
+        grid_p_l1 = self.data.get("im_active_power_l1", 0)
+        grid_p_l2 = self.data.get("im_active_power_l2", 0)
+        grid_p_l3 = self.data.get("im_active_power_l3", 0)
+        
+        self.data["grid_balance"] = grid_p_l1 + grid_p_l2 + grid_p_l3
 
         # Inverter Generation (Calculated)
         # Reg 38 (active_power) is unreliable/unknown.
