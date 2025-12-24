@@ -306,24 +306,27 @@ class IngeteamModbusHub:
         self.data["battery_voltage_internal"] = registers[17] / 10.0
         
         # Battery Power Logic
-        # Reg 21 seems to be negative for both Charging and Discharging in some firmware versions.
-        # We use Reg 19 (Battery Current) to determine the direction.
+        # Reg 21 (Power) can be inconsistent or lower than expected.
+        # We calculate Power as Voltage (Reg 16) * Current (Reg 19) for better accuracy.
         # Reg 19 > 0: Discharging
         # Reg 19 < 0: Charging
         
-        raw_power = self._decode_signed(registers[21]) / 10.0
+        # raw_power = self._decode_signed(registers[21]) / 10.0
         self.data["battery_current"] = self._decode_signed(registers[19]) / 100.0
+        
+        # Calculate power from V * I
+        calculated_power = (self.data["battery_voltage"] * self.data["battery_current"])
         
         if self.data["battery_current"] > 0:
             # Discharging
-            self.data["battery_power"] = abs(raw_power)
-            self.data["battery_discharging_power"] = abs(raw_power)
+            self.data["battery_power"] = abs(calculated_power)
+            self.data["battery_discharging_power"] = abs(calculated_power)
             self.data["battery_charging_power"] = 0.0
         elif self.data["battery_current"] < 0:
             # Charging
-            self.data["battery_power"] = -abs(raw_power)
+            self.data["battery_power"] = -abs(calculated_power)
             self.data["battery_discharging_power"] = 0.0
-            self.data["battery_charging_power"] = abs(raw_power)
+            self.data["battery_charging_power"] = abs(calculated_power)
         else:
             # Standby or 0 current
             self.data["battery_power"] = 0.0
