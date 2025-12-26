@@ -1,182 +1,145 @@
-type: custom:apexcharts-card
-header:
-  show: true
-  title: Balance Energético
-  show_states: true
-  colorize_states: true
-graph_span: 24h
-span:
-  start: day
-now:
-  show: true
-  label: Ahora
-yaxis:
-  - id: power
-    min: 0
-    decimals: 0
-    apex_config:
-      title:
-        text: Potencia (W)
-  - id: soc
-    min: 0
-    max: 100
-    opposite: true
-    decimals: 0
-    apex_config:
-      title:
-        text: SOC (%)
-      tickAmount: 5
-series:
-  # --- SOC ---
-  - entity: sensor.ingeteam_battery_state_of_charge
-    name: SOC
-    type: line
-    yaxis_id: soc
-    color: '#9e9e9e'
-    stroke_width: 2
-    extend_to: now
-    show:
-      legend_value: false
-      in_header: true
-    group_by:
-      func: last
-      duration: 5m
+type: custom:plotly-graph
 
-  # --- CONSUMO (Línea de referencia) ---
-  # 1. Valor actual
-  - entity: sensor.ingeteam_total_loads_power
-    name: Consumo
-    color: '#444444'
-    show:
-      in_chart: false
-      in_header: true
-    group_by:
-      func: last
-      duration: 5m
-  # 2. Gráfica
-  - entity: sensor.ingeteam_total_loads_power
-    name: Consumo
-    type: line
-    yaxis_id: power
-    color: '#444444'
-    stroke_width: 2
-    extend_to: now
-    show:
-      in_header: false
-    group_by:
-      func: avg
-      duration: 5m
+# Default styling and stacking behavior for traces
+defaults:
+  entity:
+    type: scatter
+    mode: lines
+    stackgroup: energy
+    fill: tonexty
+    line:
+      width: 2
+    hovertemplate: |
+      $fn ({ get }) => (
+        `%{y:,.0f} ${get('.unit_of_measurement')}<extra>${get('.name')}</extra>`
+      )
+  yaxes:
+    rangemode: nonnegative
+    zeroline: true
 
-  # --- FUENTES DE ENERGÍA (Apiladas) ---
-  # Al activar stacked: true globalmente, todas las series tipo 'area' se apilan automáticamente.
-  
-  # 1. FOTOVOLTAICA
+# Show current natural day by default
+hours_to_show: current_day
+extend_to_present: true
+autorange_after_scroll: true
+refresh_interval: auto
+
+entities:
+  # Visible stacked power traces
   - entity: sensor.ingeteam_pv_total_power
-    name: Fotovoltaica
-    color: '#FFD700'
-    show:
-      in_chart: false
-      in_header: true
-    group_by:
-      func: last
-      duration: 5m
+    name: FV
+    fill: tozeroy
+    line:
+      color: "#FFA62B" # light orange
+    filters:
+      - resample: 5m
+      - force_numeric
+  - entity: sensor.ingeteam_battery_discharging_power
+    name: Batería descarga
+    line:
+      color: "#2ECC71" # green
+    filters:
+      - resample: 5m
+      - force_numeric
+  - entity: sensor.ingeteam_battery_charging_power
+    name: Batería carga
+    line:
+      color: "#8A3A00" # very dark orange
+    filters:
+      - resample: 5m
+      - force_numeric
+  - entity: sensor.ingeteam_grid_power_balance
+    name: Red (import)
+    line:
+      color: "#0D47A1" # dark blue
+    filters:
+      - resample: 5m
+      - force_numeric
+      - map_y_numbers: Math.max(0, +y) # clamp negatives
+
+  # Internal traces to compute today's kWh totals (integrate power -> energy)
   - entity: sensor.ingeteam_pv_total_power
-    name: Fotovoltaica
-    type: area
-    yaxis_id: power
-    color: '#FFD700'
-    opacity: 0.6
-    stroke_width: 0
-    extend_to: now
-    show:
-      in_header: false
-    group_by:
-      func: avg
-      duration: 5m
-
-  # 2. DESCARGA BATERÍA
+    internal: true
+    period: 5minute
+    filters:
+      - resample: 5m
+      - force_numeric
+      - integrate: h   # Wh
+      - multiply: 0.001 # kWh
+      - store_var: pv_kwh
   - entity: sensor.ingeteam_battery_discharging_power
-    name: Descarga Bat
-    color: '#4CAF50'
-    show:
-      in_chart: false
-      in_header: true
-    group_by:
-      func: last
-      duration: 5m
-  - entity: sensor.ingeteam_battery_discharging_power
-    name: Descarga Batería
-    type: area
-    yaxis_id: power
-    color: '#4CAF50'
-    opacity: 0.7
-    stroke_width: 0
-    extend_to: now
-    show:
-      in_header: false
-    group_by:
-      func: avg
-      duration: 5m
-
-  # 3. RED (IMPORT)
-  - entity: sensor.ingeteam_grid_power_balance
-    name: Red (Import)
-    color: '#2196F3'
-    transform: 'return x > 0 ? x : 0;'
-    show:
-      in_chart: false
-      in_header: true
-    group_by:
-      func: last
-      duration: 5m
-  - entity: sensor.ingeteam_grid_power_balance
-    name: Red (Import)
-    type: area
-    yaxis_id: power
-    color: '#2196F3'
-    opacity: 0.7
-    stroke_width: 0
-    transform: 'return x > 0 ? x : 0;'
-    extend_to: now
-    show:
-      in_header: false
-    group_by:
-      func: avg
-      duration: 5m
-
-  # --- CARGA BATERÍA (Independiente) ---
-  # Cambiamos a 'line' para que NO se apile con las fuentes.
+    internal: true
+    period: 5minute
+    filters:
+      - resample: 5m
+      - force_numeric
+      - integrate: h
+      - multiply: 0.001
+      - store_var: bat_discharge_kwh
   - entity: sensor.ingeteam_battery_charging_power
-    name: Carga Bat
-    color: '#FF8C00'
-    show:
-      in_chart: false
-      in_header: true
-    group_by:
-      func: last
-      duration: 5m
-  - entity: sensor.ingeteam_battery_charging_power
-    name: Carga Batería
-    type: line
-    yaxis_id: power
-    color: '#FF8C00'
-    stroke_width: 2
-    extend_to: now
-    show:
-      in_header: false
-    group_by:
-      func: avg
-      duration: 5m
+    internal: true
+    period: 5minute
+    filters:
+      - resample: 5m
+      - force_numeric
+      - integrate: h
+      - multiply: 0.001
+      - store_var: bat_charge_kwh
+  - entity: sensor.ingeteam_grid_power_balance
+    internal: true
+    period: 5minute
+    filters:
+      - resample: 5m
+      - force_numeric
+      - map_y_numbers: Math.max(0, +y)
+      - integrate: h
+      - multiply: 0.001
+      - store_var: grid_kwh
 
-apex_config:
-  chart:
-    height: 450px
-    stacked: true
+layout:
+  margin:
+    t: 60
+    r: 10
+    b: 70
+    l: 45
   legend:
-    position: bottom
-  stroke:
-    curve: smooth
-  fill:
-    type: solid
-grid_options:
-  columns: full
+    orientation: h
+    x: 0
+    xanchor: left
+    y: -0.2
+    yanchor: top
+  title:
+    text: |
+      $ex {
+        const fmt = (v) => `${((v ?? 0)).toFixed(2)} kWh`;
+        const pv = vars.pv_kwh?.ys?.at(-1);
+        const bd = vars.bat_discharge_kwh?.ys?.at(-1);
+        const bc = vars.bat_charge_kwh?.ys?.at(-1);
+        const gr = vars.grid_kwh?.ys?.at(-1);
+        return `Hoy · FV: ${fmt(pv)} • Bat↓: ${fmt(bd)} • Bat↑: ${fmt(bc)} • Red: ${fmt(gr)}`;
+      }
+    x: 0
+    xanchor: left
+    font:
+      size: 12
+  xaxis:
+    showspikes: true
+    spikemode: across
+    spikethickness: -2
+    rangeselector:
+      x: 1
+      y: 1.05
+      buttons:
+        - label: Hoy
+          step: day
+          count: 1
+        - label: 12h
+          step: hour
+          count: 12
+        - label: Semana
+          step: day
+          count: 7
+    rangeslider:
+      visible: false
+
+config:
+  scrollZoom: true
