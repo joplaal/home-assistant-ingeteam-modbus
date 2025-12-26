@@ -95,6 +95,8 @@ views:
       - type: grid
         cards:
           - type: custom:plotly-graph
+            grid_options:
+              columns: full
             defaults:
               entity:
                 type: scatter
