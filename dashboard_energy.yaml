@@ -69,10 +69,53 @@ views:
               columns: 24
             disable_dots: false
             title: Energía
-          - type: entity
+          - graph: line
+            type: sensor
+            detail: 2
+            entity: sensor.ingeteam_total_loads_power
+            grid_options:
+              rows: 3
+              columns: 6
+            name: Cargas totales
+            icon: mdi:home-lightning-bolt
+            hours_to_show: 24
+          - graph: line
+            type: sensor
+            detail: 2
+            entity: sensor.ingeteam_critical_loads_active_power
+            grid_options:
+              columns: 6
+              rows: 3
+            name: Cargas críticas
+            icon: mdi:laptop
+            hours_to_show: 24
+          - graph: line
+            type: sensor
+            detail: 2
+            name: Red
+            entity: sensor.ingeteam_grid_power_balance
+            icon: mdi:transmission-tower-import
+            grid_options:
+              rows: 3
+            hours_to_show: 24
+          - graph: line
+            type: sensor
+            detail: 1
             entity: sensor.ingeteam_system_efficiency
-            icon: mdi:solar-panel
             name: Ratio autoconsumo
+            hours_to_show: 24
+            grid_options:
+              columns: 6
+              rows: 3
+          - graph: line
+            type: sensor
+            entity: sensor.ingeteam_pv_internal_total_power
+            detail: 2
+            icon: mdi:solar-power-variant-outline
+            name: Fotovoltaica
+            grid_options:
+              rows: 3
+            hours_to_show: 24
           - type: entities
             entities:
               - entity: sensor.ingeteam_pv1_power
@@ -82,19 +125,45 @@ views:
             title: Producción solar
             grid_options:
               columns: 6
-              rows: auto
-          - type: entities
-            entities:
-              - entity: sensor.ingeteam_total_loads_power
-                name: Totales
-              - entity: sensor.ingeteam_critical_loads_active_power
-                name: Críticas
-                icon: mdi:lightbulb-alert
-            title: Cargas
+              rows: 3
+          - graph: line
+            type: sensor
+            detail: 2
+            entity: sensor.ingeteam_battery_discharging_power
+            grid_options:
+              rows: 3
+            icon: mdi:battery-minus-variant
+            name: Descarga de batería
+            hours_to_show: 24
+          - graph: line
+            type: sensor
+            detail: 2
+            entity: sensor.ingeteam_battery_charging_power
+            grid_options:
+              rows: 3
+            icon: mdi:battery-plus-variant
+            name: Carga de batería
+            hours_to_show: 24
+          - type: entity
+            entity: sensor.ingeteam_battery_status
+            name: Estado batería
+            grid_options:
+              columns: 6
+              rows: 3
+          - graph: line
+            type: sensor
+            detail: 2
+            entity: sensor.ingeteam_battery_state_of_charge
+            name: Batería SOC %
+            grid_options:
+              rows: 3
+              columns: 24
+            hours_to_show: 24
         column_span: 2
       - type: grid
         cards:
           - type: custom:plotly-graph
+            title: Fuentes
             grid_options:
               columns: full
             defaults:
@@ -105,6 +174,8 @@ views:
                 fill: tonexty
                 line:
                   width: 2
+                  shape: spline
+                  smoothing: 0.7
                 hovertemplate: |
                   $fn ({ get }) => (
                     `%{y:,.0f} ${get('.unit_of_measurement')}<extra>${get('.name')}</extra>`
@@ -125,6 +196,7 @@ views:
                 filters:
                   - resample: 5m
                   - force_numeric
+                  - filter: +y > 0
               - entity: sensor.ingeteam_battery_discharging_power
                 name: Batería descarga
                 line:
@@ -132,21 +204,26 @@ views:
                 filters:
                   - resample: 5m
                   - force_numeric
+                  - filter: +y > 0
               - entity: sensor.ingeteam_battery_charging_power
                 name: Batería carga
                 line:
-                  color: '#8A3A00'
+                  color: '#EF5350'
+                opacity: 0.85
                 filters:
                   - resample: 5m
                   - force_numeric
+                  - filter: +y > 0
               - entity: sensor.ingeteam_grid_power_balance
                 name: Red (import)
                 line:
-                  color: '#0D47A1'
+                  color: '#1E88E5'
+                opacity: 0.85
                 filters:
                   - resample: 5m
                   - force_numeric
                   - map_y_numbers: Math.max(0, +y)
+                  - filter: +y > 0
               - entity: sensor.ingeteam_pv_total_power
                 internal: true
                 period: 5minute
@@ -185,6 +262,7 @@ views:
                   - multiply: 0.001
                   - store_var: grid_kwh
             layout:
+              height: 420
               margin:
                 t: 60
                 r: 10
@@ -204,14 +282,152 @@ views:
                     const bd = vars.bat_discharge_kwh?.ys?.at(-1);
                     const bc = vars.bat_charge_kwh?.ys?.at(-1);
                     const gr = vars.grid_kwh?.ys?.at(-1);
-                    return `Hoy · FV: ${fmt(pv)} • Bat↓: ${fmt(bd)} • Bat↑: ${fmt(bc)} • Red: ${fmt(gr)}`;
+                    return `Total · FV: ${fmt(pv)} • Bat↓: ${fmt(bd)} • Bat↑: ${fmt(bc)} • Red: ${fmt(gr)}`;
                   }
                 x: 0
                 xanchor: left
                 font:
                   size: 12
               xaxis:
-                showspikes: true
+                showspikes: false
+                spikemode: across
+                spikethickness: -2
+                rangeselector:
+                  x: 1
+                  'y': 1.05
+                  buttons:
+                    - label: Hoy
+                      step: day
+                      count: 1
+                    - label: 12h
+                      step: hour
+                      count: 12
+                    - label: Semana
+                      step: day
+                      count: 7
+                rangeslider:
+                  visible: false
+            config:
+              scrollZoom: true
+          - type: custom:plotly-graph
+            title: Cargas
+            grid_options:
+              columns: full
+            defaults:
+              entity:
+                type: scatter
+                mode: lines
+                stackgroup: loads
+                fill: tonexty
+                line:
+                  width: 2
+                  shape: spline
+                  smoothing: 0.7
+                hovertemplate: |
+                  $fn ({ get }) => (
+                    `%{y:,.0f} ${get('.unit_of_measurement')}<extra>${get('.name')}</extra>`
+                  )
+              yaxes:
+                rangemode: nonnegative
+                zeroline: true
+            hours_to_show: current_day
+            extend_to_present: true
+            autorange_after_scroll: true
+            refresh_interval: auto
+            entities:
+              - entity: sensor.ingeteam_total_loads_power
+                internal: true
+                period: 5minute
+                filters:
+                  - resample: 5m
+                  - force_numeric
+                  - store_var: loads_total
+                  - integrate: h
+                  - multiply: 0.001
+                  - store_var: loads_total_kwh
+              - entity: sensor.ingeteam_critical_loads_active_power
+                internal: true
+                period: 5minute
+                filters:
+                  - resample: 5m
+                  - force_numeric
+                  - store_var: loads_critical
+                  - integrate: h
+                  - multiply: 0.001
+                  - store_var: loads_critical_kwh
+              - entity: sensor.cargador_v2c_potencia_de_carga
+                internal: true
+                period: 5minute
+                filters:
+                  - resample: 5m
+                  - force_numeric
+                  - store_var: loads_v2c
+                  - integrate: h
+                  - multiply: 0.001
+                  - store_var: loads_v2c_kwh
+              - entity: sensor.ingeteam_critical_loads_active_power
+                name: Cargas críticas
+                fill: tozeroy
+                line:
+                  color: '#EF5350'
+                filters:
+                  - resample: 5m
+                  - force_numeric
+                  - filter: +y > 0
+              - entity: sensor.cargador_v2c_potencia_de_carga
+                name: Cargador VE
+                line:
+                  color: '#1E88E5'
+                filters:
+                  - resample: 5m
+                  - force_numeric
+                  - filter: +y > 0
+              - entity: sensor.ingeteam_total_loads_power
+                name: Resto de cargas
+                line:
+                  color: '#FBC02D'
+                filters:
+                  - resample: 5m
+                  - force_numeric
+                  - fn: |
+                      ({ xs, vars }) => {
+                        const t = vars.loads_total?.ys || [];
+                        const c = vars.loads_critical?.ys || [];
+                        const v = vars.loads_v2c?.ys || [];
+                        const ys = t.map((tv, i) => Math.max(0, (+tv || 0) - (+c[i] || 0) - (+v[i] || 0)));
+                        return { ys };
+                      }
+                  - force_numeric
+                  - filter: +y > 0
+            layout:
+              height: 420
+              margin:
+                t: 60
+                r: 10
+                b: 70
+                l: 45
+              legend:
+                orientation: h
+                x: 0
+                xanchor: left
+                'y': -0.2
+                yanchor: top
+              title:
+                text: |
+                  $ex {
+                    const fmt = (v) => `${((v ?? 0)).toFixed(2)} kWh`;
+                    const tot = vars.loads_total_kwh?.ys?.at(-1) ?? 0;
+                    const cri = vars.loads_critical_kwh?.ys?.at(-1) ?? 0;
+                    const ev  = vars.loads_v2c_kwh?.ys?.at(-1) ?? 0;
+                    const rest = Math.max(0, tot - cri - ev);
+                    return `Total · Resto: ${fmt(rest)} • Críticas: ${fmt(cri)} • Cargador VE: ${fmt(ev)}`;
+                  }
+                x: 0
+                xanchor: left
+                font:
+                  size: 12
+              xaxis:
+                showspikes: false
                 spikemode: across
                 spikethickness: -2
                 rangeselector:
@@ -233,93 +449,6 @@ views:
               scrollZoom: true
         column_span: 2
       - type: grid
-        cards:
-          - type: heading
-            heading: Nueva sección
-          - graph: line
-            type: sensor
-            detail: 2
-            name: Red
-            entity: sensor.ingeteam_grid_power_balance
-            icon: mdi:transmission-tower-import
-            grid_options:
-              rows: 3
-            hours_to_show: 24
-          - graph: line
-            type: sensor
-            entity: sensor.ingeteam_pv_internal_total_power
-            detail: 2
-            icon: mdi:solar-power-variant-outline
-            name: Fotovoltaica
-            grid_options:
-              rows: 3
-            hours_to_show: 24
-          - graph: line
-            type: sensor
-            detail: 2
-            entity: sensor.ingeteam_battery_discharging_power
-            grid_options:
-              rows: 3
-            icon: mdi:battery-minus-variant
-            name: Descarga de batería
-            hours_to_show: 24
-          - graph: line
-            type: sensor
-            detail: 2
-            entity: sensor.ingeteam_battery_charging_power
-            grid_options:
-              rows: 3
-            icon: mdi:battery-plus-variant
-            name: Carga de batería
-            hours_to_show: 24
-          - graph: line
-            type: sensor
-            detail: 2
-            entity: sensor.ingeteam_battery_state_of_charge
-            name: Batería SOC %
-            grid_options:
-              rows: 3
-            hours_to_show: 24
-          - graph: line
-            type: sensor
-            detail: 1
-            entity: sensor.ingeteam_system_efficiency
-            name: Ratio autoconsumo
-            hours_to_show: 24
-            grid_options:
-              columns: 6
-              rows: 3
-          - type: entity
-            entity: sensor.ingeteam_battery_status
-        column_span: 2
-      - type: grid
-        cards:
-          - graph: line
-            type: sensor
-            detail: 2
-            entity: sensor.ingeteam_total_loads_power
-            grid_options:
-              rows: 3
-              columns: full
-            name: Cargas totales
-            icon: mdi:home-lightning-bolt
-            hours_to_show: 24
-          - graph: line
-            type: sensor
-            detail: 2
-            entity: sensor.ingeteam_critical_loads_active_power
-            grid_options:
-              columns: full
-              rows: 3
-            name: Cargas críticas
-            icon: mdi:laptop
-            hours_to_show: 24
-          - graph: line
-            type: sensor
-            detail: 2
-            grid_options:
-              columns: full
-              rows: 3
-            entity: sensor.cargador_v2c_potencia_de_carga
+        cards: []
         column_span: 2
     cards: []
