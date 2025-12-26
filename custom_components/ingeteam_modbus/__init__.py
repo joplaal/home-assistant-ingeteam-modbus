@@ -311,17 +311,18 @@ class IngeteamModbusHub:
         # Reg 19 > 0: Discharging
         # Reg 19 < 0: Charging
         
-        # raw_power = self._decode_signed(registers[21]) / 10.0
+        raw_power_21 = self._decode_signed(registers[21]) / 10.0
         self.data["battery_current"] = self._decode_signed(registers[19]) / 100.0
         
         # Calculate power from V * I
         calculated_power = (self.data["battery_voltage"] * self.data["battery_current"])
         
-        # Deadband for very low current (phantom discharge/charge)
-        # If current is less than 0.25A (approx 100W), force power to 0 to match Ingeteam panel
-        if abs(self.data["battery_current"]) < 0.25:
+        # Deadband / Zero Override
+        # 1. If the inverter reports 0W (Reg 21), trust it (matches official panel).
+        # 2. If current is very low (< 0.5A ~ 200W), treat as phantom load.
+        if raw_power_21 == 0 or abs(self.data["battery_current"]) < 0.5:
             calculated_power = 0.0
-            self.data["battery_current"] = 0.0 # Optional: force current to 0 too if desired
+            self.data["battery_current"] = 0.0
         
         if self.data["battery_current"] > 0:
             # Discharging
