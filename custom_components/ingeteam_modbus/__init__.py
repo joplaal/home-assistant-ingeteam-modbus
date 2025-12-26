@@ -317,6 +317,12 @@ class IngeteamModbusHub:
         # Calculate power from V * I
         calculated_power = (self.data["battery_voltage"] * self.data["battery_current"])
         
+        # Deadband for very low current (phantom discharge/charge)
+        # If current is less than 0.25A (approx 100W), force power to 0 to match Ingeteam panel
+        if abs(self.data["battery_current"]) < 0.25:
+            calculated_power = 0.0
+            self.data["battery_current"] = 0.0 # Optional: force current to 0 too if desired
+        
         if self.data["battery_current"] > 0:
             # Discharging
             self.data["battery_power"] = abs(calculated_power)
