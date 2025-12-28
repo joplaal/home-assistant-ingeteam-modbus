@@ -154,13 +154,14 @@ INVERTER_STATUS = {
     8: "Emergency Charge from Grid",
     9: "Inverter Locked waiting for Reset",
     10: "Error Mode"
+   
 }
 
 BATTERY_STATUS = {
     0: "Standby",
     1: "Discharging",
-    2: "Constant Current Charging",
-    3: "Constant Voltage Charging",
+    2: "Charging Constant Current",
+    3: "Charging Constant Voltage",
     4: "Floating",
     5: "Equalizing",
     6: "Error Communication with BMS",

@@ -471,20 +471,28 @@ class IngeteamModbusHub:
         # self.data["di_2_status"] = registers[111] # Values 11/12 do not match boolean status
         # self.data["di_3_status"] = registers[112] # Value 37 does not match boolean status
         
-        # New Mappings from Hunt
-        # self.data["battery_charge_limitation_reason"] = registers[2] # Value 22 out of range for enum
-        self.data["battery_bms_warnings"] = registers[4] # Likely bitmask
-        self.data["battery_bms_errors"] = registers[5] # Likely bitmask
-        self.data["ap_reduction_ratio"] = registers[14]
-        self.data["ap_reduction_reason"] = registers[15]
+        # New Mappings from Hunt - INCORRECT (Regs 0-5 are Date/Time)
+        # self.data["battery_charge_limitation_reason"] = registers[2] # Day
+        # self.data["battery_bms_warnings"] = registers[4] # Minute
+        # self.data["battery_bms_errors"] = registers[5] # Second
+        # self.data["ap_reduction_ratio"] = registers[14]
+        # self.data["ap_reduction_reason"] = registers[15]
         # self.data["waiting_time"] = registers[120] # Value 21634 too high for seconds
         
         self.data["temp_mod_1"] = self._decode_signed(registers[125]) / 1.0
         self.data["temp_mod_2"] = self._decode_signed(registers[126]) / 1.0
         # self.data["temp_pcb"] = self._decode_signed(registers[127]) / 1.0
         self.data["temp_pcb"] = self._decode_signed(registers[112]) / 1.0
-        self.data["inverter_state"] = registers[129]
-        self.data["status"] = INVERTER_STATUS.get(registers[129], f"Unknown ({registers[129]})")
+        
+        # Inverter Status
+        # Reg 129 seems to be a bitmask or internal state (values 16, 21, 41, 43 seen).
+        # Reg 1007 (index 137) seems to be the standard status code (3 = On-grid).
+        # registers list structure: 0-99 (0-99), 100-129 (100-129), 1000-1059 (130-189)
+        
+        status_reg_1007 = registers[137] if len(registers) > 137 else 0
+        
+        self.data["inverter_state"] = status_reg_1007
+        self.data["status"] = INVERTER_STATUS.get(status_reg_1007, f"Unknown ({status_reg_1007})")
 
         # --- Calculated Values ---
         
