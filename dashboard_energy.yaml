@@ -103,6 +103,41 @@ views:
             grid_options:
               columns: 6
               rows: 3
+          - type: entity
+            entity: sensor.ingeteam_status
+            name: Estado inversor
+            grid_options:
+              columns: 6
+              rows: 3
+          - graph: line
+            type: sensor
+            detail: 2
+            name: Red
+            entity: sensor.ingeteam_grid_power_balance
+            icon: mdi:transmission-tower-import
+            grid_options:
+              rows: 3
+            hours_to_show: 24
+          - graph: line
+            type: sensor
+            detail: 2
+            entity: sensor.ingeteam_total_loads_power
+            grid_options:
+              rows: 3
+              columns: 6
+            name: Cargas totales
+            icon: mdi:home-lightning-bolt
+            hours_to_show: 24
+          - graph: line
+            type: sensor
+            detail: 2
+            entity: sensor.ingeteam_critical_loads_active_power
+            grid_options:
+              columns: 6
+              rows: 3
+            name: Cargas críticas
+            icon: mdi:laptop
+            hours_to_show: 24
         column_span: 2
       - type: grid
         cards:
@@ -127,6 +162,7 @@ views:
               yaxes:
                 rangemode: nonnegative
                 zeroline: true
+                fixedrange: true
             hours_to_show: current_day
             extend_to_present: true
             autorange_after_scroll: true
@@ -145,15 +181,6 @@ views:
                 name: Batería descarga
                 line:
                   color: '#2ECC71'
-                filters:
-                  - resample: 5m
-                  - force_numeric
-                  - filter: +y > 0
-              - entity: sensor.ingeteam_battery_charging_power
-                name: Batería carga
-                line:
-                  color: '#EF5350'
-                opacity: 0.85
                 filters:
                   - resample: 5m
                   - force_numeric
@@ -186,15 +213,6 @@ views:
                   - integrate: h
                   - multiply: 0.001
                   - store_var: bat_discharge_kwh
-              - entity: sensor.ingeteam_battery_charging_power
-                internal: true
-                period: 5minute
-                filters:
-                  - resample: 5m
-                  - force_numeric
-                  - integrate: h
-                  - multiply: 0.001
-                  - store_var: bat_charge_kwh
               - entity: sensor.ingeteam_grid_power_balance
                 internal: true
                 period: 5minute
@@ -224,17 +242,23 @@ views:
                     const fmt = (v) => `${((v ?? 0)).toFixed(2)} kWh`;
                     const pv = vars.pv_kwh?.ys?.at(-1);
                     const bd = vars.bat_discharge_kwh?.ys?.at(-1);
-                    const bc = vars.bat_charge_kwh?.ys?.at(-1);
                     const gr = vars.grid_kwh?.ys?.at(-1);
-                    return `Total · FV: ${fmt(pv)} • Bat↓: ${fmt(bd)} • Bat↑: ${fmt(bc)} • Red: ${fmt(gr)}`;
+                    return `Total · FV: ${fmt(pv)} • Bat↓: ${fmt(bd)} • Red: ${fmt(gr)}`;
                   }
                 x: 0
                 xanchor: left
                 font:
                   size: 12
               xaxis:
+                range:
+                  - $ex new Date().setHours(0,0,0,0)
+                  - $ex Date.now()
                 rangeselector:
                   buttons:
+                    - count: 1
+                      step: hour
+                      stepmode: backward
+                      label: 1h
                     - count: 1
                       step: day
                       stepmode: todate
@@ -277,8 +301,8 @@ views:
               yaxes:
                 rangemode: nonnegative
                 zeroline: true
+                fixedrange: true
             hours_to_show: current_day
-            extend_to_present: true
             autorange_after_scroll: true
             refresh_interval: auto
             entities:
@@ -312,9 +336,27 @@ views:
                   - integrate: h
                   - multiply: 0.001
                   - store_var: loads_v2c_kwh
+              - entity: sensor.ingeteam_battery_charging_power
+                internal: true
+                period: 5minute
+                filters:
+                  - resample: 5m
+                  - force_numeric
+                  - integrate: h
+                  - multiply: 0.001
+                  - store_var: bat_charge_kwh
+              - entity: sensor.ingeteam_battery_charging_power
+                name: Batería carga
+                fill: tozeroy
+                line:
+                  color: '#2ECC71'
+                opacity: 0.85
+                filters:
+                  - resample: 5m
+                  - force_numeric
+                  - filter: +y > 0
               - entity: sensor.ingeteam_critical_loads_active_power
                 name: Cargas críticas
-                fill: tozeroy
                 line:
                   color: '#EF5350'
                 filters:
@@ -332,7 +374,7 @@ views:
               - entity: sensor.ingeteam_total_loads_power
                 name: Resto de cargas
                 line:
-                  color: '#FBC02D'
+                  color: '#9C27B0'
                 filters:
                   - resample: 5m
                   - force_numeric
@@ -366,14 +408,40 @@ views:
                     const tot = vars.loads_total_kwh?.ys?.at(-1) ?? 0;
                     const cri = vars.loads_critical_kwh?.ys?.at(-1) ?? 0;
                     const ev  = vars.loads_v2c_kwh?.ys?.at(-1) ?? 0;
+                    const bc  = vars.bat_charge_kwh?.ys?.at(-1) ?? 0;
                     const rest = Math.max(0, tot - cri - ev);
-                    return `Total · Resto: ${fmt(rest)} • Críticas: ${fmt(cri)} • Cargador VE: ${fmt(ev)}`;
+                    return `Total · Resto: ${fmt(rest)} • Críticas: ${fmt(cri)} • Cargador VE: ${fmt(ev)} • Bat↑: ${fmt(bc)}`;
                   }
                 x: 0
                 xanchor: left
                 font:
                   size: 12
               xaxis:
+                range:
+                  - $ex new Date().setHours(0,0,0,0)
+                  - $ex Date.now()
+                rangeselector:
+                  buttons:
+                    - count: 1
+                      step: hour
+                      stepmode: backward
+                      label: 1h
+                    - count: 1
+                      step: day
+                      stepmode: todate
+                      label: Hoy
+                    - count: 2
+                      step: day
+                      stepmode: todate
+                      label: Ayer
+                    - count: 3
+                      step: day
+                      stepmode: todate
+                      label: Anteayer
+                    - count: 7
+                      step: day
+                      stepmode: todate
+                      label: Semana
                 showspikes: false
                 spikemode: across
                 spikethickness: -2
@@ -404,7 +472,7 @@ views:
                 type: scatter
                 fill: tozeroy
                 line:
-                  color: '#EF5350'
+                  color: '#2ECC71'
                 filters:
                   - resample: 5m
                   - force_numeric
@@ -454,14 +522,153 @@ views:
                   size: 12
               yaxis:
                 title: Potencia (W)
+                fixedrange: true
               yaxis2:
                 title: SOC (%)
                 overlaying: 'y'
                 side: right
+                fixedrange: true
                 range:
                   - 0
                   - 100
               xaxis:
+                range:
+                  - $ex new Date().setHours(0,0,0,0)
+                  - $ex Date.now()
+                rangeselector:
+                  buttons:
+                    - count: 1
+                      step: hour
+                      stepmode: backward
+                      label: 1h
+                    - count: 1
+                      step: day
+                      stepmode: todate
+                      label: Hoy
+                    - count: 2
+                      step: day
+                      stepmode: todate
+                      label: Ayer
+                    - count: 3
+                      step: day
+                      stepmode: todate
+                      label: Anteayer
+                    - count: 7
+                      step: day
+                      stepmode: todate
+                      label: Semana
+                showspikes: false
+                spikemode: across
+                spikethickness: -2
+            config:
+              scrollZoom: true
+          - type: custom:plotly-graph
+            title: Cargas críticas por fase
+            grid_options:
+              columns: full
+            defaults:
+              entity:
+                type: scatter
+                mode: lines
+                stackgroup: critical_phases
+                fill: tonexty
+                line:
+                  width: 2
+                  shape: spline
+                  smoothing: 0.7
+                hovertemplate: |
+                  $fn ({ get }) => (
+                    `%{y:,.0f} ${get('.unit_of_measurement')}<extra>${get('.name')}</extra>`
+                  )
+              yaxes:
+                rangemode: nonnegative
+                zeroline: true
+                fixedrange: true
+            hours_to_show: current_day
+            extend_to_present: true
+            autorange_after_scroll: true
+            refresh_interval: auto
+            entities:
+              - entity: sensor.ingeteam_critical_loads_power_l1
+                name: L1
+                fill: tozeroy
+                line:
+                  color: '#EF5350'
+                filters:
+                  - resample: 5m
+                  - force_numeric
+                  - store_var: l1
+                  - filter: +y > 0
+              - entity: sensor.ingeteam_critical_loads_power_l2
+                name: L2
+                line:
+                  color: '#FFCA28'
+                filters:
+                  - resample: 5m
+                  - force_numeric
+                  - store_var: l2
+                  - filter: +y > 0
+              - entity: sensor.ingeteam_critical_loads_power_l3
+                name: L3
+                line:
+                  color: '#42A5F5'
+                filters:
+                  - resample: 5m
+                  - force_numeric
+                  - store_var: l3
+                  - filter: +y > 0
+            layout:
+              height: 420
+              margin:
+                t: 60
+                r: 10
+                b: 70
+                l: 45
+              legend:
+                orientation: h
+                x: 0
+                xanchor: left
+                'y': -0.2
+                yanchor: top
+              title:
+                text: |
+                  $ex {
+                    const fmt = (v) => `${((v ?? 0)).toFixed(0)} W`;
+                    const l1 = vars.l1?.ys?.at(-1);
+                    const l2 = vars.l2?.ys?.at(-1);
+                    const l3 = vars.l3?.ys?.at(-1);
+                    return `L1: ${fmt(l1)} • L2: ${fmt(l2)} • L3: ${fmt(l3)}`;
+                  }
+                x: 0
+                xanchor: left
+                font:
+                  size: 12
+              xaxis:
+                range:
+                  - $ex new Date().setHours(0,0,0,0)
+                  - $ex Date.now()
+                rangeselector:
+                  buttons:
+                    - count: 1
+                      step: hour
+                      stepmode: backward
+                      label: 1h
+                    - count: 1
+                      step: day
+                      stepmode: todate
+                      label: Hoy
+                    - count: 2
+                      step: day
+                      stepmode: todate
+                      label: Ayer
+                    - count: 3
+                      step: day
+                      stepmode: todate
+                      label: Anteayer
+                    - count: 7
+                      step: day
+                      stepmode: todate
+                      label: Semana
                 showspikes: false
                 spikemode: across
                 spikethickness: -2
@@ -470,29 +677,13 @@ views:
         column_span: 2
       - type: grid
         cards:
+          - type: entities
+            entities:
+              - entity: sensor.ingeteam_active_power_reduction_ratio
+              - entity: sensor.ingeteam_active_power_reduction_reason
           - type: heading
             heading: Debug
             heading_style: title
-          - graph: line
-            type: sensor
-            detail: 2
-            entity: sensor.ingeteam_total_loads_power
-            grid_options:
-              rows: 3
-              columns: 6
-            name: Cargas totales
-            icon: mdi:home-lightning-bolt
-            hours_to_show: 24
-          - graph: line
-            type: sensor
-            detail: 2
-            entity: sensor.ingeteam_critical_loads_active_power
-            grid_options:
-              columns: 6
-              rows: 3
-            name: Cargas críticas
-            icon: mdi:laptop
-            hours_to_show: 24
           - graph: line
             type: sensor
             detail: 2
@@ -508,15 +699,6 @@ views:
             detail: 2
             icon: mdi:solar-power-variant-outline
             name: Fotovoltaica
-            grid_options:
-              rows: 3
-            hours_to_show: 24
-          - graph: line
-            type: sensor
-            detail: 2
-            name: Red
-            entity: sensor.ingeteam_grid_power_balance
-            icon: mdi:transmission-tower-import
             grid_options:
               rows: 3
             hours_to_show: 24
