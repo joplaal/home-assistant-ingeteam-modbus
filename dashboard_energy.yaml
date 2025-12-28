@@ -732,11 +732,11 @@ views:
             title: Configuración niveles SOC
             entities:
               - entity: sensor.ingeteam_config_soc_max
-                name: SOC Máximo (Carga máx)
-              - entity: sensor.ingeteam_config_soc_min
-                name: SOC Mínimo (Paro descarga)
+                name: SOC Máximo (Carga máx)              
               - entity: sensor.ingeteam_config_soc_recovery
                 name: SOC Recuperación (Reinicio descarga)
+              - entity: sensor.ingeteam_config_soc_min
+                name: SOC Mínimo (Paro descarga)
               - entity: sensor.ingeteam_config_soc_recx
                 name: SOC Recx (Reinicio aislada)
               - entity: sensor.ingeteam_config_soc_descx
