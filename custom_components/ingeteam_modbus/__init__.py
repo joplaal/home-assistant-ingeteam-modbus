@@ -574,12 +574,29 @@ class IngeteamModbusHub:
             
             # AC Charging Settings
             self.data["config_soc_ac_charging_power"] = get_holding(23)
-            self.data["config_soc_ac_charging_schedule1_type"] = "All Week" if get_holding(31) == 1 else "Custom"
+            
+            # Schedule Decoding from Register 25
+            # Bits 4-5: Schedule 1 Type
+            # Bits 6-7: Schedule 2 Type
+            reg_25 = get_holding(25)
+            sch1_type = (reg_25 >> 4) & 0x03
+            sch2_type = (reg_25 >> 6) & 0x03
+            
+            SCHEDULE_TYPES = {
+                0: "Desactivado",
+                1: "Toda la semana",
+                2: "Entre semana (L-V)",
+                3: "Fin de semana (S-D)"
+            }
+            
+            # Schedule 1
+            self.data["config_soc_ac_charging_schedule1_type"] = SCHEDULE_TYPES.get(sch1_type, f"Desconocido ({sch1_type})")
             self.data["config_soc_ac_charging_soc_grid1"] = get_holding(32)
             self.data["config_soc_ac_charging_time_start1"] = decode_time(get_holding(33))
             self.data["config_soc_ac_charging_time_end1"] = decode_time(get_holding(34))
             
-            self.data["config_soc_ac_charging_schedule2_type"] = "Weekend" if get_holding(38) == 0 else "Custom"
+            # Schedule 2
+            self.data["config_soc_ac_charging_schedule2_type"] = SCHEDULE_TYPES.get(sch2_type, f"Desconocido ({sch2_type})")
             self.data["config_soc_ac_charging_soc_grid2"] = get_holding(35)
             self.data["config_soc_ac_charging_time_start2"] = decode_time(get_holding(36))
             self.data["config_soc_ac_charging_time_end2"] = decode_time(get_holding(37))
