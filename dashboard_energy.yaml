@@ -732,7 +732,7 @@ views:
             title: Configuración niveles SOC
             entities:
               - entity: sensor.ingeteam_config_soc_max
-                name: SOC Máximo (Carga máx)              
+                name: SOC Máximo (Carga máx)
               - entity: sensor.ingeteam_config_soc_recovery
                 name: SOC Recuperación (Reinicio descarga)
               - entity: sensor.ingeteam_config_soc_min
@@ -742,7 +742,7 @@ views:
               - entity: sensor.ingeteam_config_soc_descx
                 name: SOC Descx (Paro aislada)
             grid_options:
-              columns: 6
+              columns: 12
               rows: auto
           - type: entities
             title: Configuración Carga SOC
@@ -770,7 +770,7 @@ views:
               - entity: sensor.ingeteam_config_soc_ac_charging_time_end2
                 name: Fin
             grid_options:
-              columns: 6
+              columns: 12
               rows: auto
         column_span: 2
     cards: []
