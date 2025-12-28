@@ -135,6 +135,8 @@ BATTERY_SENSOR_TYPES = {
     "Battery_BMS_Errors": ["Battery BMS Errors", "battery_bms_errors", None, None],
     "Battery_BMS_Faults": ["Battery BMS Faults", "battery_bms_faults", None, None],
     "Battery_Charge_Limitation": ["Battery Charge Limitation Reason", "battery_charge_limitation_reason", None, None],
+    "Battery_Charging_Energy": ["Battery Charging Energy", "battery_charging_energy", "Wh", None, "battery_charging_power"],
+    "Battery_Discharging_Energy": ["Battery Discharging Energy", "battery_discharging_energy", "Wh", None, "battery_discharging_power"],
 }
 
 BOOLEAN_STATUS = {

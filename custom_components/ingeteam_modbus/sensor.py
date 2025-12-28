@@ -144,6 +144,8 @@ async def async_setup_entry(hass, entry, async_add_entities):
                 )
             entities.append(sensor)
 
+        entities.append(IngeteamNetBatteryPowerSensor(hub_name, hub, device_info))
+
     async_add_entities(entities)
     return True
 
@@ -312,3 +314,26 @@ class IngeteamSensor(SensorEntity):
     @property
     def device_info(self) -> Optional[Dict[str, Any]]:
         return self._device_info
+
+
+class IngeteamNetBatteryPowerSensor(IngeteamSensor):
+    """Representation of an Ingeteam Battery Power Sensor (Discharge - Charge)."""
+
+    def __init__(self, platform_name, hub, device_info):
+        """Initialize the sensor."""
+        super().__init__(
+            platform_name, 
+            hub, 
+            device_info, 
+            "Battery Power", 
+            "battery_power", 
+            "W", 
+            "mdi:battery-charging-100"
+        )
+
+    @property
+    def state(self):
+        """Return the state of the sensor."""
+        charge = self._hub.data.get("battery_charging_power", 0)
+        discharge = self._hub.data.get("battery_discharging_power", 0)
+        return discharge - charge

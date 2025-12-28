@@ -505,6 +505,12 @@ views:
           - type: heading
             heading: Debug
             heading_style: title
+          - type: entity
+            entity: sensor.ingeteam_status
+            name: Estado inversor
+            grid_options:
+              columns: 6
+              rows: 3
           - graph: line
             type: sensor
             detail: 1
@@ -514,6 +520,58 @@ views:
             grid_options:
               columns: 6
               rows: 3
+          - graph: line
+            type: sensor
+            entity: sensor.ingeteam_pv_internal_total_power
+            detail: 2
+            icon: mdi:solar-power-variant-outline
+            name: Fotovoltaica
+            grid_options:
+              rows: 3
+            hours_to_show: 24
+          - type: entities
+            entities:
+              - entity: sensor.ingeteam_pv1_power
+                name: PV1
+              - entity: sensor.ingeteam_pv2_power
+                name: PV2
+            title: Producción solar
+            grid_options:
+              columns: 6
+              rows: 3
+          - type: entity
+            entity: sensor.ingeteam_battery_status
+            name: Estado batería
+            grid_options:
+              columns: 6
+              rows: 3
+          - graph: line
+            type: sensor
+            detail: 2
+            entity: sensor.ingeteam_battery_state_of_charge
+            name: Batería SOC %
+            grid_options:
+              rows: 3
+              columns: 6
+            hours_to_show: 24
+          - graph: line
+            type: sensor
+            detail: 2
+            entity: sensor.ingeteam_battery_charging_power
+            grid_options:
+              rows: 3
+            icon: mdi:battery-plus-variant
+            name: Carga de batería
+            hours_to_show: 24
+          - graph: line
+            type: sensor
+            detail: 2
+            entity: sensor.ingeteam_battery_discharging_power
+            grid_options:
+              rows: 3
+            icon: mdi:battery-minus-variant
+            name: Descarga de batería
+            hours_to_show: 24
           - graph: line
             type: sensor
             detail: 2
@@ -543,64 +601,18 @@ views:
             name: Cargas críticas
             icon: mdi:laptop
             hours_to_show: 24
-          - graph: line
-            type: sensor
-            entity: sensor.ingeteam_pv_internal_total_power
-            detail: 2
-            icon: mdi:solar-power-variant-outline
-            name: Fotovoltaica
-            grid_options:
-              rows: 3
-            hours_to_show: 24
           - type: entities
             entities:
-              - entity: sensor.ingeteam_pv1_power
-                name: PV1
-              - entity: sensor.ingeteam_pv2_power
-                name: PV2
-            title: Producción solar
+              - entity: sensor.ingeteam_critical_loads_power_l1
+                name: L1
+              - entity: sensor.ingeteam_critical_loads_power_l2
+                name: L2
+              - entity: sensor.ingeteam_critical_loads_power_l3
+                name: L3
+            title: Críticas por fase
             grid_options:
               columns: 6
-              rows: 3
-          - type: entity
-            entity: sensor.ingeteam_status
-            name: Estado inversor
-            grid_options:
-              columns: 6
-              rows: 3
-          - graph: line
-            type: sensor
-            detail: 2
-            entity: sensor.ingeteam_battery_state_of_charge
-            name: Batería SOC %
-            grid_options:
-              rows: 3
-              columns: 6
-            hours_to_show: 24
-          - type: entity
-            entity: sensor.ingeteam_battery_status
-            name: Estado batería
-            grid_options:
-              columns: 6
-              rows: 3
-          - graph: line
-            type: sensor
-            detail: 2
-            entity: sensor.ingeteam_battery_discharging_power
-            grid_options:
-              rows: 3
-            icon: mdi:battery-minus-variant
-            name: Descarga de batería
-            hours_to_show: 24
-          - graph: line
-            type: sensor
-            detail: 2
-            entity: sensor.ingeteam_battery_charging_power
-            grid_options:
-              rows: 3
-            icon: mdi:battery-plus-variant
-            name: Carga de batería
-            hours_to_show: 24
+              rows: auto
           - type: custom:plotly-graph
             title: Cargas críticas por fase
             grid_options:
