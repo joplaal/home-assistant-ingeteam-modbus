@@ -2,6 +2,7 @@
 import asyncio
 import logging
 import threading
+import time
 from datetime import timedelta
 from typing import Optional
 
@@ -128,6 +129,7 @@ class IngeteamModbusHub:
         self._sensors = []
         self.data = {}
         self._slave_arg = None
+        self._last_config_update = 0
 
     @callback
     def async_add_ingeteam_sensor(self, update_callback):
@@ -322,12 +324,17 @@ class IngeteamModbusHub:
              regs_1000 = req3.registers
 
         # Chunk 4: Holding Registers 0-50 (Configuration)
-        req4 = self.read_holding_registers(unit=self._address, address=0, count=50)
-        if req4.isError():
-             _LOGGER.error("Error reading holding registers (0-50): %s", req4)
-             holding_regs = [0] * 50
-        else:
-             holding_regs = req4.registers
+        # Read only every 60 seconds to avoid overloading the inverter
+        holding_regs = None
+        now = time.time()
+        if now - self._last_config_update > 60:
+            req4 = self.read_holding_registers(unit=self._address, address=0, count=50)
+            if req4.isError():
+                _LOGGER.error("Error reading holding registers (0-50): %s", req4)
+                # holding_regs remains None, so we skip processing
+            else:
+                holding_regs = req4.registers
+                self._last_config_update = now
 
         registers = req1.registers + req2.registers + regs_1000
         
@@ -344,7 +351,7 @@ class IngeteamModbusHub:
             
         # Helper to get Holding Registers safely
         def get_holding(offset):
-            if offset < len(holding_regs):
+            if holding_regs and offset < len(holding_regs):
                 return holding_regs[offset]
             return 0
             
@@ -557,24 +564,25 @@ class IngeteamModbusHub:
         self.data["status"] = INVERTER_STATUS.get(status_reg_1007, f"Unknown ({status_reg_1007})")
 
         # --- Configuration (Holding Registers) ---
-        # SOC Settings
-        self.data["config_soc_max"] = get_holding(14)
-        self.data["config_soc_min"] = get_holding(28)
-        self.data["config_soc_recovery"] = get_holding(27)
-        self.data["config_soc_recx"] = get_holding(29)
-        self.data["config_soc_descx"] = get_holding(30)
-        
-        # AC Charging Settings
-        self.data["config_soc_ac_charging_power"] = get_holding(23)
-        self.data["config_soc_ac_charging_schedule1_type"] = "All Week" if get_holding(31) == 1 else "Custom"
-        self.data["config_soc_ac_charging_soc_grid1"] = get_holding(32)
-        self.data["config_soc_ac_charging_time_start1"] = decode_time(get_holding(33))
-        self.data["config_soc_ac_charging_time_end1"] = decode_time(get_holding(34))
-        
-        self.data["config_soc_ac_charging_schedule2_type"] = "Weekend" if get_holding(38) == 0 else "Custom"
-        self.data["config_soc_ac_charging_soc_grid2"] = get_holding(35)
-        self.data["config_soc_ac_charging_time_start2"] = decode_time(get_holding(36))
-        self.data["config_soc_ac_charging_time_end2"] = decode_time(get_holding(37))
+        if holding_regs:
+            # SOC Settings
+            self.data["config_soc_max"] = get_holding(14)
+            self.data["config_soc_min"] = get_holding(28)
+            self.data["config_soc_recovery"] = get_holding(27)
+            self.data["config_soc_recx"] = get_holding(29)
+            self.data["config_soc_descx"] = get_holding(30)
+            
+            # AC Charging Settings
+            self.data["config_soc_ac_charging_power"] = get_holding(23)
+            self.data["config_soc_ac_charging_schedule1_type"] = "All Week" if get_holding(31) == 1 else "Custom"
+            self.data["config_soc_ac_charging_soc_grid1"] = get_holding(32)
+            self.data["config_soc_ac_charging_time_start1"] = decode_time(get_holding(33))
+            self.data["config_soc_ac_charging_time_end1"] = decode_time(get_holding(34))
+            
+            self.data["config_soc_ac_charging_schedule2_type"] = "Weekend" if get_holding(38) == 0 else "Custom"
+            self.data["config_soc_ac_charging_soc_grid2"] = get_holding(35)
+            self.data["config_soc_ac_charging_time_start2"] = decode_time(get_holding(36))
+            self.data["config_soc_ac_charging_time_end2"] = decode_time(get_holding(37))
 
         # --- Calculated Values ---
         
