@@ -238,6 +238,46 @@ class IngeteamModbusHub:
             _LOGGER.error("Could not read registers: pymodbus version incompatibility")
             raise ModbusException("Incompatible pymodbus version")
 
+    def read_holding_registers(self, unit, address, count):
+        """Read holding registers."""
+        with self._lock:
+            kwargs = {"address": address, "count": count}
+            
+            # If we already know the correct argument, use it
+            if self._slave_arg:
+                kwargs[self._slave_arg] = unit
+                return self._client.read_holding_registers(**kwargs)
+
+            # Try pymodbus v3.10+ (device_id keyword)
+            try:
+                kwargs["device_id"] = unit
+                result = self._client.read_holding_registers(**kwargs)
+                self._slave_arg = "device_id"
+                return result
+            except TypeError:
+                kwargs.pop("device_id")
+
+            # Try pymodbus v3.x (slave keyword)
+            try:
+                kwargs["slave"] = unit
+                result = self._client.read_holding_registers(**kwargs)
+                self._slave_arg = "slave"
+                return result
+            except TypeError:
+                kwargs.pop("slave")
+            
+            # Try pymodbus v2.x (unit keyword)
+            try:
+                kwargs["unit"] = unit
+                result = self._client.read_holding_registers(**kwargs)
+                self._slave_arg = "unit"
+                return result
+            except TypeError:
+                kwargs.pop("unit")
+
+            _LOGGER.error("Could not read registers: pymodbus version incompatibility")
+            raise ModbusException("Incompatible pymodbus version")
+
     @staticmethod
     def _decode_signed(value: int) -> int:
         """Decode a 16-bit signed integer (two's complement)."""
@@ -281,6 +321,14 @@ class IngeteamModbusHub:
         else:
              regs_1000 = req3.registers
 
+        # Chunk 4: Holding Registers 0-50 (Configuration)
+        req4 = self.read_holding_registers(unit=self._address, address=0, count=50)
+        if req4.isError():
+             _LOGGER.error("Error reading holding registers (0-50): %s", req4)
+             holding_regs = [0] * 50
+        else:
+             holding_regs = req4.registers
+
         registers = req1.registers + req2.registers + regs_1000
         
         if len(registers) < 130:
@@ -293,6 +341,20 @@ class IngeteamModbusHub:
             if idx < len(registers):
                 return registers[idx]
             return 0
+            
+        # Helper to get Holding Registers safely
+        def get_holding(offset):
+            if offset < len(holding_regs):
+                return holding_regs[offset]
+            return 0
+            
+        # Helper to decode packed time (HHMM in hex)
+        def decode_time(val):
+            # Val is like 2048 (0x0800) -> 08:00
+            # Val is like 0 (0x0000) -> 00:00
+            hour = (val >> 8) & 0xFF
+            minute = val & 0xFF
+            return f"{hour:02d}:{minute:02d}"
 
         # --- 3Play Hybrid Mapping ---
         
@@ -493,6 +555,26 @@ class IngeteamModbusHub:
         
         self.data["inverter_state"] = status_reg_1007
         self.data["status"] = INVERTER_STATUS.get(status_reg_1007, f"Unknown ({status_reg_1007})")
+
+        # --- Configuration (Holding Registers) ---
+        # SOC Settings
+        self.data["config_soc_max"] = get_holding(14)
+        self.data["config_soc_min"] = get_holding(28)
+        self.data["config_soc_recovery"] = get_holding(27)
+        self.data["config_soc_recx"] = get_holding(29)
+        self.data["config_soc_descx"] = get_holding(30)
+        
+        # AC Charging Settings
+        self.data["config_soc_ac_charging_power"] = get_holding(23)
+        self.data["config_soc_ac_charging_schedule1_type"] = "All Week" if get_holding(31) == 1 else "Custom"
+        self.data["config_soc_ac_charging_soc_grid1"] = get_holding(32)
+        self.data["config_soc_ac_charging_time_start1"] = decode_time(get_holding(33))
+        self.data["config_soc_ac_charging_time_end1"] = decode_time(get_holding(34))
+        
+        self.data["config_soc_ac_charging_schedule2_type"] = "Weekend" if get_holding(38) == 0 else "Custom"
+        self.data["config_soc_ac_charging_soc_grid2"] = get_holding(35)
+        self.data["config_soc_ac_charging_time_start2"] = decode_time(get_holding(36))
+        self.data["config_soc_ac_charging_time_end2"] = decode_time(get_holding(37))
 
         # --- Calculated Values ---
         

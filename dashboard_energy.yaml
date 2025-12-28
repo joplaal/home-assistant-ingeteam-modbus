@@ -723,4 +723,54 @@ views:
             config:
               scrollZoom: true
         column_span: 2
+      - type: grid
+        cards:
+          - type: heading
+            heading: Configuración
+            heading_style: title
+          - type: entities
+            title: Configuración niveles SOC
+            entities:
+              - entity: sensor.ingeteam_config_soc_max
+                name: SOC Máximo
+              - entity: sensor.ingeteam_config_soc_min
+                name: SOC Mínimo
+              - entity: sensor.ingeteam_config_soc_recovery
+                name: SOC Recuperación
+              - entity: sensor.ingeteam_config_soc_recx
+                name: SOC Recx
+              - entity: sensor.ingeteam_config_soc_descx
+                name: SOC Descx
+            grid_options:
+              columns: 6
+              rows: auto
+          - type: entities
+            title: Configuración Carga SOC
+            entities:
+              - entity: sensor.ingeteam_config_soc_ac_charging_power
+                name: Potencia Carga AC
+              - type: section
+                label: Horario 1
+              - entity: sensor.ingeteam_config_soc_ac_charging_schedule1_type
+                name: Tipo
+              - entity: sensor.ingeteam_config_soc_ac_charging_soc_grid1
+                name: SOC Objetivo
+              - entity: sensor.ingeteam_config_soc_ac_charging_time_start1
+                name: Inicio
+              - entity: sensor.ingeteam_config_soc_ac_charging_time_end1
+                name: Fin
+              - type: section
+                label: Horario 2
+              - entity: sensor.ingeteam_config_soc_ac_charging_schedule2_type
+                name: Tipo
+              - entity: sensor.ingeteam_config_soc_ac_charging_soc_grid2
+                name: SOC Objetivo
+              - entity: sensor.ingeteam_config_soc_ac_charging_time_start2
+                name: Inicio
+              - entity: sensor.ingeteam_config_soc_ac_charging_time_end2
+                name: Fin
+            grid_options:
+              columns: 6
+              rows: auto
+        column_span: 2
     cards: []

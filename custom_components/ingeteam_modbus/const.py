@@ -81,6 +81,24 @@ INVERTER_SENSOR_TYPES = {
     "EM_Active_Power_L1": ["External Meter Active Power L1", "em_active_power_l1", "W", None],
     "EM_Active_Power_L2": ["External Meter Active Power L2", "em_active_power_l2", "W", None],
     "EM_Active_Power_L3": ["External Meter Active Power L3", "em_active_power_l3", "W", None],
+    
+    # Configuration - SOC
+    "Config_SOC_Max": ["Config SOC Max", "config_soc_max", "%", "mdi:battery-high"],
+    "Config_SOC_Min": ["Config SOC Min", "config_soc_min", "%", "mdi:battery-low"],
+    "Config_SOC_Recovery": ["Config SOC Recovery", "config_soc_recovery", "%", "mdi:battery-sync"],
+    "Config_SOC_Recx": ["Config SOC Recx", "config_soc_recx", "%", "mdi:battery-alert"],
+    "Config_SOC_Descx": ["Config SOC Descx", "config_soc_descx", "%", "mdi:battery-off"],
+
+    # Configuration - AC Charging
+    "Config_AC_Charging_Power": ["Config AC Charging Power", "config_soc_ac_charging_power", "W", "mdi:flash"],
+    "Config_Schedule1_Type": ["Config Schedule 1 Type", "config_soc_ac_charging_schedule1_type", None, "mdi:calendar"],
+    "Config_SOC_Grid_1": ["Config SOC Grid 1", "config_soc_ac_charging_soc_grid1", "%", "mdi:battery-charging"],
+    "Config_Time_Start_1": ["Config Time Start 1", "config_soc_ac_charging_time_start1", None, "mdi:clock-start"],
+    "Config_Time_End_1": ["Config Time End 1", "config_soc_ac_charging_time_end1", None, "mdi:clock-end"],
+    "Config_Schedule2_Type": ["Config Schedule 2 Type", "config_soc_ac_charging_schedule2_type", None, "mdi:calendar"],
+    "Config_SOC_Grid_2": ["Config SOC Grid 2", "config_soc_ac_charging_soc_grid2", "%", "mdi:battery-charging"],
+    "Config_Time_Start_2": ["Config Time Start 2", "config_soc_ac_charging_time_start2", None, "mdi:clock-start"],
+    "Config_Time_End_2": ["Config Time End 2", "config_soc_ac_charging_time_end2", None, "mdi:clock-end"],
 }
 
 METER_SENSOR_TYPES = {
