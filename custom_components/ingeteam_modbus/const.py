@@ -90,15 +90,15 @@ INVERTER_SENSOR_TYPES = {
     "Config_SOC_Descx": ["Config SOC Descx", "config_soc_descx", "%", "mdi:battery-off"],
 
     # Configuration - AC Charging
-    "Config_AC_Charging_Power": ["Config AC Charging Power", "config_soc_ac_charging_power", "W", "mdi:flash"],
-    "Config_Schedule1_Type": ["Config Schedule 1 Type", "config_soc_ac_charging_schedule1_type", None, "mdi:calendar"],
-    "Config_SOC_Grid_1": ["Config SOC Grid 1", "config_soc_ac_charging_soc_grid1", "%", "mdi:battery-charging"],
-    "Config_Time_Start_1": ["Config Time Start 1", "config_soc_ac_charging_time_start1", None, "mdi:clock-start"],
-    "Config_Time_End_1": ["Config Time End 1", "config_soc_ac_charging_time_end1", None, "mdi:clock-end"],
-    "Config_Schedule2_Type": ["Config Schedule 2 Type", "config_soc_ac_charging_schedule2_type", None, "mdi:calendar"],
-    "Config_SOC_Grid_2": ["Config SOC Grid 2", "config_soc_ac_charging_soc_grid2", "%", "mdi:battery-charging"],
-    "Config_Time_Start_2": ["Config Time Start 2", "config_soc_ac_charging_time_start2", None, "mdi:clock-start"],
-    "Config_Time_End_2": ["Config Time End 2", "config_soc_ac_charging_time_end2", None, "mdi:clock-end"],
+    "Config_AC_Charging_Power": ["Config SOC AC Charging Power", "config_soc_ac_charging_power", "W", "mdi:flash"],
+    "Config_Schedule1_Type": ["Config SOC AC Charging Schedule1 Type", "config_soc_ac_charging_schedule1_type", None, "mdi:calendar"],
+    "Config_SOC_Grid_1": ["Config SOC AC Charging SOC Grid1", "config_soc_ac_charging_soc_grid1", "%", "mdi:battery-charging"],
+    "Config_Time_Start_1": ["Config SOC AC Charging Time Start1", "config_soc_ac_charging_time_start1", None, "mdi:clock-start"],
+    "Config_Time_End_1": ["Config SOC AC Charging Time End1", "config_soc_ac_charging_time_end1", None, "mdi:clock-end"],
+    "Config_Schedule2_Type": ["Config SOC AC Charging Schedule2 Type", "config_soc_ac_charging_schedule2_type", None, "mdi:calendar"],
+    "Config_SOC_Grid_2": ["Config SOC AC Charging SOC Grid2", "config_soc_ac_charging_soc_grid2", "%", "mdi:battery-charging"],
+    "Config_Time_Start_2": ["Config SOC AC Charging Time Start2", "config_soc_ac_charging_time_start2", None, "mdi:clock-start"],
+    "Config_Time_End_2": ["Config SOC AC Charging Time End2", "config_soc_ac_charging_time_end2", None, "mdi:clock-end"],
 }
 
 METER_SENSOR_TYPES = {
