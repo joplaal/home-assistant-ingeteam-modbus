@@ -732,11 +732,11 @@ views:
             title: Configuración niveles SOC
             entities:
               - entity: sensor.ingeteam_config_soc_max
-                name: SOC Máximo
-              - entity: sensor.ingeteam_config_soc_min
-                name: SOC Mínimo
+                name: SOC Máximo             
               - entity: sensor.ingeteam_config_soc_recovery
                 name: SOC Recuperación
+               - entity: sensor.ingeteam_config_soc_min
+                name: SOC Mínimo  
               - entity: sensor.ingeteam_config_soc_recx
                 name: SOC Recx
               - entity: sensor.ingeteam_config_soc_descx
