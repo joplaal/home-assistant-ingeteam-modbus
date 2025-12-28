@@ -732,15 +732,15 @@ views:
             title: Configuración niveles SOC
             entities:
               - entity: sensor.ingeteam_config_soc_max
-                name: SOC Máximo             
+                name: SOC Máximo (Carga máx)
+              - entity: sensor.ingeteam_config_soc_min
+                name: SOC Mínimo (Paro descarga)
               - entity: sensor.ingeteam_config_soc_recovery
-                name: SOC Recuperación
-               - entity: sensor.ingeteam_config_soc_min
-                name: SOC Mínimo  
+                name: SOC Recuperación (Reinicio descarga)
               - entity: sensor.ingeteam_config_soc_recx
-                name: SOC Recx
+                name: SOC Recx (Reinicio aislada)
               - entity: sensor.ingeteam_config_soc_descx
-                name: SOC Descx
+                name: SOC Descx (Paro aislada)
             grid_options:
               columns: 6
               rows: auto
@@ -748,13 +748,13 @@ views:
             title: Configuración Carga SOC
             entities:
               - entity: sensor.ingeteam_config_soc_ac_charging_power
-                name: Potencia Carga AC
+                name: Potencia Carga AC (Máx desde Red)
               - type: section
                 label: Horario 1
               - entity: sensor.ingeteam_config_soc_ac_charging_schedule1_type
                 name: Tipo
               - entity: sensor.ingeteam_config_soc_ac_charging_soc_grid1
-                name: SOC Objetivo
+                name: SOC Objetivo (Mantener)
               - entity: sensor.ingeteam_config_soc_ac_charging_time_start1
                 name: Inicio
               - entity: sensor.ingeteam_config_soc_ac_charging_time_end1
@@ -764,7 +764,7 @@ views:
               - entity: sensor.ingeteam_config_soc_ac_charging_schedule2_type
                 name: Tipo
               - entity: sensor.ingeteam_config_soc_ac_charging_soc_grid2
-                name: SOC Objetivo
+                name: SOC Objetivo (Mantener)
               - entity: sensor.ingeteam_config_soc_ac_charging_time_start2
                 name: Inicio
               - entity: sensor.ingeteam_config_soc_ac_charging_time_end2

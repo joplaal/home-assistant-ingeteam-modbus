@@ -83,22 +83,22 @@ INVERTER_SENSOR_TYPES = {
     "EM_Active_Power_L3": ["External Meter Active Power L3", "em_active_power_l3", "W", None],
     
     # Configuration - SOC
-    "Config_SOC_Max": ["Config SOC Max", "config_soc_max", "%", "mdi:battery-high"],
-    "Config_SOC_Min": ["Config SOC Min", "config_soc_min", "%", "mdi:battery-low"],
-    "Config_SOC_Recovery": ["Config SOC Recovery", "config_soc_recovery", "%", "mdi:battery-sync"],
-    "Config_SOC_Recx": ["Config SOC Recx", "config_soc_recx", "%", "mdi:battery-alert"],
-    "Config_SOC_Descx": ["Config SOC Descx", "config_soc_descx", "%", "mdi:battery-off"],
+    "Config_SOC_Max": ["Config SOC Max", "config_soc_max", "%", "mdi:battery-high", "Carga máxima de las baterías"],
+    "Config_SOC_Min": ["Config SOC Min", "config_soc_min", "%", "mdi:battery-low", "Paro de la descarga de la batería en Autoconsumo e inicio del PeakShaving"],
+    "Config_SOC_Recovery": ["Config SOC Recovery", "config_soc_recovery", "%", "mdi:battery-sync", "Reinicio de la descarga de la batería en Autoconsumo. Evita un ciclado excesivo"],
+    "Config_SOC_Recx": ["Config SOC Recx", "config_soc_recx", "%", "mdi:battery-alert", "Reinicio del suministro de energía a las cargas críticas en Aislada y reinicio del PeakShaving"],
+    "Config_SOC_Descx": ["Config SOC Descx", "config_soc_descx", "%", "mdi:battery-off", "Paro del suministro de energía a las cargas críticas en Aislada y paro del PeakShaving"],
 
     # Configuration - AC Charging
-    "Config_AC_Charging_Power": ["Config SOC AC Charging Power", "config_soc_ac_charging_power", "W", "mdi:flash"],
-    "Config_Schedule1_Type": ["Config SOC AC Charging Schedule1 Type", "config_soc_ac_charging_schedule1_type", None, "mdi:calendar"],
-    "Config_SOC_Grid_1": ["Config SOC AC Charging SOC Grid1", "config_soc_ac_charging_soc_grid1", "%", "mdi:battery-charging"],
-    "Config_Time_Start_1": ["Config SOC AC Charging Time Start1", "config_soc_ac_charging_time_start1", None, "mdi:clock-start"],
-    "Config_Time_End_1": ["Config SOC AC Charging Time End1", "config_soc_ac_charging_time_end1", None, "mdi:clock-end"],
-    "Config_Schedule2_Type": ["Config SOC AC Charging Schedule2 Type", "config_soc_ac_charging_schedule2_type", None, "mdi:calendar"],
-    "Config_SOC_Grid_2": ["Config SOC AC Charging SOC Grid2", "config_soc_ac_charging_soc_grid2", "%", "mdi:battery-charging"],
-    "Config_Time_Start_2": ["Config SOC AC Charging Time Start2", "config_soc_ac_charging_time_start2", None, "mdi:clock-start"],
-    "Config_Time_End_2": ["Config SOC AC Charging Time End2", "config_soc_ac_charging_time_end2", None, "mdi:clock-end"],
+    "Config_AC_Charging_Power": ["Config SOC AC Charging Power", "config_soc_ac_charging_power", "W", "mdi:flash", "Potencia máxima de carga de baterías desde Red"],
+    "Config_Schedule1_Type": ["Config SOC AC Charging Schedule1 Type", "config_soc_ac_charging_schedule1_type", None, "mdi:calendar", "Tipo de programación horaria 1"],
+    "Config_SOC_Grid_1": ["Config SOC AC Charging SOC Grid1", "config_soc_ac_charging_soc_grid1", "%", "mdi:battery-charging", "Carga máxima para mantener las baterías desde la Red (Horario 1)"],
+    "Config_Time_Start_1": ["Config SOC AC Charging Time Start1", "config_soc_ac_charging_time_start1", None, "mdi:clock-start", "Hora de inicio de carga AC (Horario 1)"],
+    "Config_Time_End_1": ["Config SOC AC Charging Time End1", "config_soc_ac_charging_time_end1", None, "mdi:clock-end", "Hora de fin de carga AC (Horario 1)"],
+    "Config_Schedule2_Type": ["Config SOC AC Charging Schedule2 Type", "config_soc_ac_charging_schedule2_type", None, "mdi:calendar", "Tipo de programación horaria 2"],
+    "Config_SOC_Grid_2": ["Config SOC AC Charging SOC Grid2", "config_soc_ac_charging_soc_grid2", "%", "mdi:battery-charging", "Carga máxima para mantener las baterías desde la Red (Horario 2)"],
+    "Config_Time_Start_2": ["Config SOC AC Charging Time Start2", "config_soc_ac_charging_time_start2", None, "mdi:clock-start", "Hora de inicio de carga AC (Horario 2)"],
+    "Config_Time_End_2": ["Config SOC AC Charging Time End2", "config_soc_ac_charging_time_end2", None, "mdi:clock-end", "Hora de fin de carga AC (Horario 2)"],
 }
 
 METER_SENSOR_TYPES = {

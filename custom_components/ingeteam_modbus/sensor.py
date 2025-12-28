@@ -63,14 +63,15 @@ async def async_setup_entry(hass, entry, async_add_entities):
         entities.append(sensor)
     
     for sensor_info in INVERTER_SENSOR_TYPES.values():
-        if len(sensor_info) > 4 :
+        if len(sensor_info) > 4 and sensor_info[2] == "Wh":
             sensor = CalculatedEnergySensor(
                 hub,
                 name=f'{hub_name} {sensor_info[0]}', 
                 source_entity=f'sensor.{hub_name}_{sensor_info[4]}',
                 unique_id=f'{hub_name}_{sensor_info[1]}',
             )
-        else:    
+        else:
+            description = sensor_info[4] if len(sensor_info) > 4 else None
             sensor = IngeteamSensor(
                 hub_name,
                 hub,
@@ -79,6 +80,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
                 sensor_info[1],
                 sensor_info[2],
                 sensor_info[3],
+                description
             )
         entities.append(sensor)
 
@@ -253,7 +255,7 @@ class CalculatedEnergySensor(IntegrationSensor):
 class IngeteamSensor(SensorEntity):
     """Representation of an Ingeteam Modbus sensor."""
 
-    def __init__(self, platform_name, hub, device_info, name, key, unit, icon):
+    def __init__(self, platform_name, hub, device_info, name, key, unit, icon, description=None):
         """Initialize the sensor."""
         self._platform_name = platform_name
         self._hub = hub
@@ -264,6 +266,8 @@ class IngeteamSensor(SensorEntity):
         self._device_info = device_info
         self._attr_state_class = SensorStateClass.MEASUREMENT
         self.entity_description = _DESCRIPTIONS.get(unit, DIAG_SENSOR)
+        if description:
+            self._attr_extra_state_attributes = {"description": description}
 
     async def async_added_to_hass(self):
         """Register callbacks."""
