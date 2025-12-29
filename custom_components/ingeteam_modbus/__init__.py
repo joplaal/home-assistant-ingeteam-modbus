@@ -463,17 +463,17 @@ class IngeteamModbusHub:
         # Critical Loads (AC Output)
         self.data["cl_current_l1"] = registers[49] / 100.0
         self.data["ac_l1_current"] = self.data["cl_current_l1"] # Alias
-        self.data["cl_active_power_l1"] = self._decode_signed(registers[51]) / 10.0
+        self.data["cl_active_power_l1"] = registers[51] / 10.0
         self.data["ac_l1_power"] = self.data["cl_active_power_l1"] # Alias
         
         self.data["cl_current_l2"] = registers[53] / 100.0
         self.data["ac_l2_current"] = self.data["cl_current_l2"] # Alias
-        self.data["cl_active_power_l2"] = self._decode_signed(registers[55]) / 10.0
+        self.data["cl_active_power_l2"] = registers[55] / 10.0
         self.data["ac_l2_power"] = self.data["cl_active_power_l2"] # Alias
         
         self.data["cl_current_l3"] = registers[57] / 100.0
         self.data["ac_l3_current"] = self.data["cl_current_l3"] # Alias
-        self.data["cl_active_power_l3"] = self._decode_signed(registers[59]) / 10.0
+        self.data["cl_active_power_l3"] = registers[59] / 10.0
         self.data["ac_l3_power"] = self.data["cl_active_power_l3"] # Alias
         
         self.data["cl_voltage_l1"] = registers[60] / 10.0
