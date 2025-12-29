@@ -292,6 +292,15 @@ views:
                   - resample: 1m
                   - force_numeric
                   - filter: +y > 0
+              - entity: sensor.ingeteam_grid_power_balance
+                name: Inyección a red
+                line:
+                  color: '#9C27B0'
+                filters:
+                  - resample: 1m
+                  - force_numeric
+                  - multiply: -1
+                  - filter: +y > 0
               - entity: sensor.cargador_v2c_potencia_de_carga
                 name: Cargador VE
                 line:
@@ -311,7 +320,7 @@ views:
               - entity: sensor.ingeteam_total_loads_power
                 name: Resto de cargas
                 line:
-                  color: '#9C27B0'
+                  color: '#616161'
                 filters:
                   - resample: 1m
                   - force_numeric
