@@ -49,7 +49,8 @@ class IngeteamTime(TimeEntity):
         self._hub_name = hub_name
         self._key = info["key"]
         self._attr_name = info["name"]
-        self._attr_unique_id = f"{hub_name}_{info['key']}"
+        # Append _time to unique_id to force new entity creation with correct name prefix
+        self._attr_unique_id = f"{hub_name}_{info['key']}_time"
         self._attr_icon = info["icon"]
         self._address = info["address"]
         self._attr_device_info = {

@@ -51,7 +51,8 @@ class IngeteamNumber(NumberEntity):
         self._hub_name = hub_name
         self._key = info["key"]
         self._attr_name = info["name"]
-        self._attr_unique_id = f"{hub_name}_{info['key']}"
+        # Append _number to unique_id to force new entity creation with correct name prefix
+        self._attr_unique_id = f"{hub_name}_{info['key']}_number"
         self._attr_native_unit_of_measurement = info["native_unit_of_measurement"]
         self._attr_icon = info["icon"]
         self._address = info["address"]
