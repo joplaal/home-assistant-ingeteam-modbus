@@ -652,7 +652,7 @@ views:
                 line:
                   color: '#EF5350'
                 filters:
-                  - resample: 1m
+                  - resample: 10s
                   - force_numeric
                   - store_var: l1
                   - filter: +y > 0
@@ -661,7 +661,7 @@ views:
                 line:
                   color: '#FFCA28'
                 filters:
-                  - resample: 1m
+                  - resample: 10s
                   - force_numeric
                   - store_var: l2
                   - filter: +y > 0
@@ -670,7 +670,7 @@ views:
                 line:
                   color: '#42A5F5'
                 filters:
-                  - resample: 1m
+                  - resample: 10s
                   - force_numeric
                   - store_var: l3
                   - filter: +y > 0

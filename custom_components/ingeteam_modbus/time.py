@@ -46,6 +46,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
 class IngeteamTime(TimeEntity):
     def __init__(self, hub, hub_name, info):
         self._hub = hub
+        self._hub_name = hub_name
         self._key = info["key"]
         self._attr_name = info["name"]
         self._attr_unique_id = f"{hub_name}_{info['key']}"
@@ -56,6 +57,10 @@ class IngeteamTime(TimeEntity):
             "name": hub_name,
             "manufacturer": ATTR_MANUFACTURER,
         }
+
+    @property
+    def name(self):
+        return f"{self._hub_name} {self._attr_name}"
 
     @property
     def native_value(self):
