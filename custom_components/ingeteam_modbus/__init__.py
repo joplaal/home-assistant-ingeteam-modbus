@@ -55,7 +55,7 @@ INGETEAM_MODBUS_SCHEMA = vol.Schema(
 
 CONFIG_SCHEMA = vol.Schema({DOMAIN: vol.Schema({cv.slug: INGETEAM_MODBUS_SCHEMA})}, extra=vol.ALLOW_EXTRA)
 
-PLATFORMS = ["sensor"]
+PLATFORMS = ["sensor", "select"]
 
 
 async def async_setup(hass, config):
@@ -279,6 +279,87 @@ class IngeteamModbusHub:
 
             _LOGGER.error("Could not read registers: pymodbus version incompatibility")
             raise ModbusException("Incompatible pymodbus version")
+
+    def write_register(self, unit, address, value):
+        """Write a single holding register."""
+        with self._lock:
+            kwargs = {"address": address, "value": value}
+            
+            # If we already know the correct argument, use it
+            if self._slave_arg:
+                kwargs[self._slave_arg] = unit
+                return self._client.write_register(**kwargs)
+
+            # Try pymodbus v3.10+ (device_id keyword)
+            try:
+                kwargs["device_id"] = unit
+                result = self._client.write_register(**kwargs)
+                self._slave_arg = "device_id"
+                return result
+            except TypeError:
+                kwargs.pop("device_id")
+
+            # Try pymodbus v3.x (slave keyword)
+            try:
+                kwargs["slave"] = unit
+                result = self._client.write_register(**kwargs)
+                self._slave_arg = "slave"
+                return result
+            except TypeError:
+                kwargs.pop("slave")
+            
+            # Try pymodbus v2.x (unit keyword)
+            try:
+                kwargs["unit"] = unit
+                result = self._client.write_register(**kwargs)
+                self._slave_arg = "unit"
+                return result
+            except TypeError:
+                kwargs.pop("unit")
+
+            _LOGGER.error("Could not write register: pymodbus version incompatibility")
+            raise ModbusException("Incompatible pymodbus version")
+
+    async def set_schedule_type(self, schedule_index, value):
+        """Set the schedule type (0=Disabled, 1=All Week, 2=Weekdays, 3=Weekend)."""
+        def _write_modbus():
+            # 1. Read current value of Register 25
+            rr = self.read_holding_registers(unit=self._address, address=25, count=1)
+            if rr.isError():
+                _LOGGER.error("Error reading register 25 for update: %s", rr)
+                return False
+            
+            current_val = rr.registers[0]
+            
+            # 2. Calculate new value
+            # Bits 4-5: Sch1, Bits 6-7: Sch2
+            sch1_current = (current_val >> 4) & 0x03
+            sch2_current = (current_val >> 6) & 0x03
+            
+            if schedule_index == 1:
+                target_sch1 = value
+                target_sch2 = sch2_current
+            else:
+                target_sch1 = sch1_current
+                target_sch2 = value
+            
+            # Bit 0 is always 1 (Enable AC Charging global?)
+            new_val = 1 | (target_sch1 << 4) | (target_sch2 << 6)
+            
+            if new_val == current_val:
+                return True
+                
+            # 3. Write new value
+            wr = self.write_register(unit=self._address, address=25, value=new_val)
+            if wr.isError():
+                _LOGGER.error("Error writing register 25: %s", wr)
+                return False
+                
+            # Force a config refresh on next cycle
+            self._last_config_update = 0
+            return True
+
+        await self._hass.async_add_executor_job(_write_modbus)
 
     @staticmethod
     def _decode_signed(value: int) -> int:
