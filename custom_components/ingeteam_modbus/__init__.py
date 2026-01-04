@@ -42,6 +42,8 @@ from .const import (
 # Pre-import platforms to avoid blocking I/O in the event loop
 from . import sensor
 from . import select
+from . import number
+from . import time
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -59,7 +61,7 @@ INGETEAM_MODBUS_SCHEMA = vol.Schema(
 
 CONFIG_SCHEMA = vol.Schema({DOMAIN: vol.Schema({cv.slug: INGETEAM_MODBUS_SCHEMA})}, extra=vol.ALLOW_EXTRA)
 
-PLATFORMS = ["sensor", "select"]
+PLATFORMS = ["sensor", "select", "number", "time"]
 
 
 async def async_setup(hass, config):
@@ -323,6 +325,19 @@ class IngeteamModbusHub:
 
             _LOGGER.error("Could not write register: pymodbus version incompatibility")
             raise ModbusException("Incompatible pymodbus version")
+
+    async def write_modbus_register(self, address, value):
+        """Write a single register asynchronously."""
+        def _write():
+            wr = self.write_register(unit=self._address, address=address, value=value)
+            if wr.isError():
+                _LOGGER.error("Error writing register %s: %s", address, wr)
+                return False
+            # Force a config refresh on next cycle
+            self._last_config_update = 0
+            return True
+        
+        await self._hass.async_add_executor_job(_write)
 
     async def set_schedule_type(self, schedule_index, value):
         """Set the schedule type (0=Disabled, 1=All Week, 2=Weekdays, 3=Weekend)."""

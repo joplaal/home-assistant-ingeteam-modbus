@@ -744,7 +744,7 @@ views:
                 name: SOC Máximo (Carga máx)
               - entity: sensor.ingeteam_config_soc_recovery
                 name: SOC Recuperación (Reinicio descarga)
-              - entity: sensor.ingeteam_config_soc_min
+              - entity: number.ingeteam_config_soc_min
                 name: SOC Mínimo (Paro descarga)
               - entity: sensor.ingeteam_config_soc_recx
                 name: SOC Recx (Reinicio aislada)
@@ -762,21 +762,21 @@ views:
                 label: Horario 1
               - entity: select.ingeteam_horario_1_tipo
                 name: Tipo
-              - entity: sensor.ingeteam_config_soc_ac_charging_soc_grid1
+              - entity: number.ingeteam_config_soc_ac_charging_soc_grid1
                 name: SOC Objetivo (Mantener)
-              - entity: sensor.ingeteam_config_soc_ac_charging_time_start1
+              - entity: time.ingeteam_config_soc_ac_charging_time_start1
                 name: Inicio
-              - entity: sensor.ingeteam_config_soc_ac_charging_time_end1
+              - entity: time.ingeteam_config_soc_ac_charging_time_end1
                 name: Fin
               - type: section
                 label: Horario 2
               - entity: select.ingeteam_horario_2_tipo
                 name: Tipo
-              - entity: sensor.ingeteam_config_soc_ac_charging_soc_grid2
+              - entity: number.ingeteam_config_soc_ac_charging_soc_grid2
                 name: SOC Objetivo (Mantener)
-              - entity: sensor.ingeteam_config_soc_ac_charging_time_start2
+              - entity: time.ingeteam_config_soc_ac_charging_time_start2
                 name: Inicio
-              - entity: sensor.ingeteam_config_soc_ac_charging_time_end2
+              - entity: time.ingeteam_config_soc_ac_charging_time_end2
                 name: Fin
             grid_options:
               columns: 12
