@@ -2,7 +2,7 @@
 import asyncio
 import logging
 import threading
-import time
+import time as std_time
 from datetime import timedelta
 from typing import Optional
 
@@ -426,7 +426,7 @@ class IngeteamModbusHub:
         # Chunk 4: Holding Registers 0-50 (Configuration)
         # Read only every 60 seconds to avoid overloading the inverter
         holding_regs = None
-        now = time.time()
+        now = std_time.time()
         if now - self._last_config_update > 60:
             req4 = self.read_holding_registers(unit=self._address, address=0, count=50)
             if req4.isError():
