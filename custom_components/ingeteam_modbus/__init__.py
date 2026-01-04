@@ -39,6 +39,10 @@ from .const import (
     AP_REDUCTION_REASONS,
 )
 
+# Pre-import platforms to avoid blocking I/O in the event loop
+from . import sensor
+from . import select
+
 _LOGGER = logging.getLogger(__name__)
 
 INGETEAM_MODBUS_SCHEMA = vol.Schema(
