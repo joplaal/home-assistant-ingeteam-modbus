@@ -1,6 +1,7 @@
 from homeassistant.components.select import SelectEntity
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from .const import DOMAIN, CONF_NAME, ATTR_MANUFACTURER
+from homeassistant.const import CONF_NAME
+from .const import DOMAIN, ATTR_MANUFACTURER
 
 SCHEDULE_OPTIONS = {
     "Desactivado": "0",
