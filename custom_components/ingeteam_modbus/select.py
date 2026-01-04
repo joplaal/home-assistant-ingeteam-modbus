@@ -44,7 +44,7 @@ class IngeteamScheduleSelect(SelectEntity):
 
     @property
     def unique_id(self):
-        return f"{self._hub.name}_{self._key}"
+        return f"{self._hub.name}_{self._key}_select"
 
     @property
     def device_info(self):

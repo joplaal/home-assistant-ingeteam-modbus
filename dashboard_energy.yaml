@@ -760,7 +760,7 @@ views:
                 name: Potencia Carga AC (Máx desde Red)
               - type: section
                 label: Horario 1
-              - entity: sensor.ingeteam_config_soc_ac_charging_schedule1_type
+              - entity: select.ingeteam_horario_1_tipo
                 name: Tipo
               - entity: sensor.ingeteam_config_soc_ac_charging_soc_grid1
                 name: SOC Objetivo (Mantener)
@@ -770,7 +770,7 @@ views:
                 name: Fin
               - type: section
                 label: Horario 2
-              - entity: sensor.ingeteam_config_soc_ac_charging_schedule2_type
+              - entity: select.ingeteam_horario_2_tipo
                 name: Tipo
               - entity: sensor.ingeteam_config_soc_ac_charging_soc_grid2
                 name: SOC Objetivo (Mantener)
