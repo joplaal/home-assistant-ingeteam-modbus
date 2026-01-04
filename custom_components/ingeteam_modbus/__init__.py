@@ -43,7 +43,7 @@ from .const import (
 from . import sensor
 from . import select
 from . import number
-from . import time
+from . import time as ingeteam_time_platform
 
 _LOGGER = logging.getLogger(__name__)
 
