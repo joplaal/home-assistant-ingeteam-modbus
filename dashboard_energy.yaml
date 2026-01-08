@@ -735,6 +735,178 @@ views:
       - type: grid
         cards:
           - type: heading
+            heading: Monitorización
+            heading_style: title
+          - type: grid
+            columns: 2
+            cards:
+              - type: vertical-stack
+                cards:
+                  - type: markdown
+                    title: Niveles SOC
+                    content: >
+                      <table>
+
+                      <tr><td><ha-icon icon="mdi:battery-high"></ha-icon>
+                      <b>Máximo</b></td><td align="right">{{
+                      states('sensor.ingeteam_config_soc_max') }} %</td></tr>
+
+                      <tr><td><ha-icon icon="mdi:battery-sync"></ha-icon>
+                      <b>Recup.</b></td><td align="right">{{
+                      states('sensor.ingeteam_config_soc_recovery') }}
+                      %</td></tr>
+
+                      <tr><td><ha-icon icon="mdi:battery-low"></ha-icon>
+                      <b>Mínimo</b></td><td align="right">{{
+                      states('number.ingeteam_config_soc_min') }} %</td></tr>
+
+                      <tr><td><ha-icon
+                      icon="mdi:battery-plus-outline"></ha-icon>
+                      <b>Recx</b></td><td align="right">{{
+                      states('sensor.ingeteam_config_soc_recx') }} %</td></tr>
+
+                      <tr><td><ha-icon
+                      icon="mdi:battery-minus-outline"></ha-icon>
+                      <b>Descx</b></td><td align="right">{{
+                      states('sensor.ingeteam_config_soc_descx') }} %</td></tr>
+
+                      </table>
+                  - type: markdown
+                    title: Auto SOC
+                    content: >
+                      <table>
+
+                      <tr><td><ha-icon icon="mdi:weather-pouring"></ha-icon>
+                      <b>Alerta AEMET</b></td><td align="right">{% if
+                      is_state('automation.ingeteam_soc_min_aemet_alert', 'on')
+                      %}<ha-icon icon="mdi:check-circle" style="color:
+                      #4CAF50;"></ha-icon>{% else %}<ha-icon
+                      icon="mdi:close-circle" style="color:
+                      #F44336;"></ha-icon>{% endif %}</td></tr>
+
+                      <tr><td><ha-icon icon="mdi:battery-alert"></ha-icon>
+                      <b>SOC (Alerta)</b></td><td align="right">{{
+                      states('input_number.ingeteam_automation_soc_min_aemet_alert_true')
+                      }} %</td></tr>
+
+                      <tr><td><ha-icon icon="mdi:battery-check"></ha-icon>
+                      <b>SOC (No Alerta)</b></td><td align="right">{{
+                      states('input_number.ingeteam_automation_soc_min_aemet_alert_false')
+                      }} %</td></tr>
+
+                      <tr><td><ha-icon icon="mdi:water-percent-alert"></ha-icon>
+                      <b>Nivel</b></td><td align="right">{{
+                      states('sensor.nivel_alerta_precipataciones_valencia')
+                      }}</td></tr>
+
+                      </table>
+              - type: vertical-stack
+                cards:
+                  - type: markdown
+                    title: Carga SOC
+                    content: >
+                      <table>
+
+                      <tr><td><ha-icon icon="mdi:flash"></ha-icon> <b>Potencia
+                      AC</b></td><td align="right">{{
+                      states('sensor.ingeteam_config_soc_ac_charging_power') }}
+                      W</td></tr>
+
+                      </table>
+                  - type: markdown
+                    title: Horario 1
+                    content: >
+                      <table>
+
+                      <tr><td><ha-icon icon="mdi:calendar-clock"></ha-icon>
+                      <b>Tipo</b></td><td align="right">{{
+                      states('select.ingeteam_horario_1_tipo') }}</td></tr>
+
+                      <tr><td><ha-icon icon="mdi:battery-charging-50"></ha-icon>
+                      <b>Objetivo</b></td><td align="right">{{
+                      states('number.ingeteam_config_soc_ac_charging_soc_grid1')
+                      }} %</td></tr>
+
+                      <tr><td><ha-icon icon="mdi:clock-start"></ha-icon>
+                      <b>Inicio</b></td><td align="right">{{
+                      states('time.ingeteam_config_soc_ac_charging_time_start1')[:5]
+                      }}</td></tr>
+
+                      <tr><td><ha-icon icon="mdi:clock-end"></ha-icon>
+                      <b>Fin</b></td><td align="right">{{
+                      states('time.ingeteam_config_soc_ac_charging_time_end1')[:5]
+                      }}</td></tr>
+
+                      </table>
+                  - type: markdown
+                    title: Horario 2
+                    content: >
+                      <table>
+
+                      <tr><td><ha-icon icon="mdi:calendar-clock"></ha-icon>
+                      <b>Tipo</b></td><td align="right">{{
+                      states('select.ingeteam_horario_2_tipo') }}</td></tr>
+
+                      <tr><td><ha-icon icon="mdi:battery-charging-50"></ha-icon>
+                      <b>Objetivo</b></td><td align="right">{{
+                      states('number.ingeteam_config_soc_ac_charging_soc_grid2')
+                      }} %</td></tr>
+
+                      <tr><td><ha-icon icon="mdi:clock-start"></ha-icon>
+                      <b>Inicio</b></td><td align="right">{{
+                      states('time.ingeteam_config_soc_ac_charging_time_start2')[:5]
+                      }}</td></tr>
+
+                      <tr><td><ha-icon icon="mdi:clock-end"></ha-icon>
+                      <b>Fin</b></td><td align="right">{{
+                      states('time.ingeteam_config_soc_ac_charging_time_end2')[:5]
+                      }}</td></tr>
+
+                      </table>
+                  - type: markdown
+                    title: Auto Carga
+                    content: >
+                      <table>
+
+                      <tr><td><ha-icon icon="mdi:robot"></ha-icon> <b>Auto
+                      Forecast</b></td><td align="right">{% if
+                      is_state('automation.ingeteam_charge_low_sun_forecast',
+                      'on') %}<ha-icon icon="mdi:check-circle" style="color:
+                      #4CAF50;"></ha-icon>{% else %}<ha-icon
+                      icon="mdi:close-circle" style="color:
+                      #F44336;"></ha-icon>{% endif %}</td></tr>
+
+                      <tr><td><ha-icon icon="mdi:power"></ha-icon>
+                      <b>Activado</b></td><td align="right">{% if
+                      is_state('input_boolean.ingeteam_charge_activated_by_forecast',
+                      'on') %}<ha-icon icon="mdi:check-circle" style="color:
+                      #4CAF50;"></ha-icon>{% else %}<ha-icon
+                      icon="mdi:close-circle" style="color:
+                      #F44336;"></ha-icon>{% endif %}</td></tr>
+
+                      <tr><td><ha-icon icon="mdi:weather-sunny"></ha-icon>
+                      <b>Mañana</b></td><td align="right">{{
+                      states('sensor.energy_production_tomorrow') }}
+                      kWh</td></tr>
+
+                      <tr><td><ha-icon icon="mdi:chart-line"></ha-icon>
+                      <b>Umbral</b></td><td align="right">{{
+                      states('input_number.ingeteam_automation_solar_forecast_threshold')
+                      }} kWh</td></tr>
+
+                      </table>
+            grid_options:
+              columns: 24
+              rows: auto
+        column_span: 2
+    cards: []
+  - type: sections
+    title: Configuración
+    path: config
+    sections:
+      - type: grid
+        cards:
+          - type: heading
             heading: Configuración
             heading_style: title
           - type: entities
