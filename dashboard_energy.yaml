@@ -750,6 +750,12 @@ views:
                 name: SOC Recx (Reinicio aislada)
               - entity: sensor.ingeteam_config_soc_descx
                 name: SOC Descx (Paro aislada)
+              - type: section
+                label: Automatización
+              - entity: automation.ingeteam_soc_min_aemet_alert
+              - entity: input_number.ingeteam_automation_soc_min_aemet_alert_true
+              - entity: input_number.ingeteam_automation_soc_min_aemet_alert_false
+              - entity: sensor.nivel_alerta_precipataciones_valencia
             grid_options:
               columns: 12
               rows: auto
@@ -778,6 +784,12 @@ views:
                 name: Inicio
               - entity: time.ingeteam_config_soc_ac_charging_time_end2
                 name: Fin
+              - type: section
+                label: Automatización
+              - entity: automation.ingeteam_charge_low_sun_forecast
+              - entity: input_boolean.ingeteam_charge_activated_by_forecast
+              - entity: sensor.energy_production_tomorrow
+              - entity: input_number.ingeteam_automation_solar_forecast_threshold
             grid_options:
               columns: 12
               rows: auto
